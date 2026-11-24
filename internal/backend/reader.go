@@ -53,7 +53,7 @@ func Read(root string) app.Reader {
 		}
 		ctx, cancel := context.WithTimeout(parent, 45*time.Second)
 		defer cancel()
-		cmd := exec.CommandContext(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", filepath.Join(root, "src", "Bridge.ps1"))
+		cmd := exec.CommandContext(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", filepath.Join(root, "src", "Bridge.ps1"), "-NativeDiagnostics")
 		configure(cmd)
 		out, err := cmd.Output()
 		if ctx.Err() != nil {
@@ -62,11 +62,26 @@ func Read(root string) app.Reader {
 		if err != nil {
 			return s, fmt.Errorf("diagnostic command failed (%T); use legacy doctor for details", err)
 		}
-		if err = json.Unmarshal([]byte(strings.TrimPrefix(strings.TrimSpace(string(out)), "\uFEFF")), &s); err != nil {
+		// Internal cache location is consumed here, never added to public Snapshot.
+		var wire struct {
+			app.Snapshot
+			NativeDiagnosticsSchema int
+			InternalCacheRoot       string
+		}
+		if err = json.Unmarshal([]byte(strings.TrimPrefix(strings.TrimSpace(string(out)), "\uFEFF")), &wire); err != nil {
 			return s, errors.New("diagnostic returned invalid JSON")
+		}
+		s = wire.Snapshot
+		if wire.NativeDiagnosticsSchema != 1 {
+			return app.Snapshot{}, errors.New("diagnostic bridge version mismatch")
 		}
 		if s.Status.Version == "" {
 			return s, errors.New("diagnostic returned incomplete data")
+		}
+		s.Logs, s.LogsKnown = nativeLogs(ctx, wire.InternalCacheRoot)
+		s.Clients = append(jsonClientAudits(os.Getenv("USERPROFILE"), os.Getenv("APPDATA")), s.Clients...)
+		if ctx.Err() != nil {
+			return app.Snapshot{}, errors.New("diagnostic timed out or was cancelled")
 		}
 		s.ManagerVersion = app.Version
 		attachNativeIdentities(&s)

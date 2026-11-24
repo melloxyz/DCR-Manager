@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased (1.4.0-dev)
+- Migrate bounded npm log scanning and known JSON MCP configuration audit to native Go.
+- Preserve the default legacy PowerShell diagnostics and use a versioned internal bridge envelope for remaining fields.
+- Document incremental native backend migration and parity gates; no new runtime modules.
+
 ## 1.3.1
 - Update checkout and setup-go to v7 (#1, #2).
 - Update Charm ANSI to v0.11.10 (#4) and Go x/sys to v0.50.0 (#3).

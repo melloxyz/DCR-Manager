@@ -7,7 +7,7 @@ This is the public product roadmap. Implemented means code exists and has fixtur
 | v1.1.0 | Structural foundation | Historical |
 | v1.2.x | Advanced management and reliability | Stable legacy baseline v1.2.1 |
 | v1.3.0 | User experience and TUI | Maintainer-approved source baseline |
-| v1.4.0 | Distribution and portability | Planned |
+| v1.4.0 | Distribution and portability | In development |
 | v2.0.0 | Complete management toolkit | Exploratory |
 
 ## v1.1.0: Structural foundation
@@ -39,7 +39,7 @@ The v1.3.0 source milestone is approved. Remaining independent real-world accept
 
 ## v1.4.0: Distribution
 
-- V14-01 (next): Audit remaining PowerShell/Python dependencies and define native parity, migration order and acceptance tests; retain safe fallback until tested.
+- V14-01 (in progress): Native backend migration. Read-only npm logs and six JSON MCP locations migrated; TOML, runtime, inventory and transactional operations remain. See [migration plan](V14-MIGRATION.md).
 - V14-02: Portable Windows AMD64 executable or self-contained bundle; explicit external prerequisites.
 - V14-03: Reproducible build/release pipeline, license/notice packaging, checksums and provenance.
 - V14-04: Public documentation, installation/uninstallation, version support and contributor workflow.

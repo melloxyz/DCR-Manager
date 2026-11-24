@@ -1,3 +1,4 @@
+param([switch]$NativeDiagnostics)
 $ErrorActionPreference='Stop'
 $WarningPreference='SilentlyContinue'
 $ProgressPreference='SilentlyContinue'
@@ -11,8 +12,8 @@ $cacheRoot="";$caches=@()
 try{ $npm=Get-Command npm.cmd -ErrorAction Stop; $cache=@(& $npm.Source config get cache 2>$null); if($LASTEXITCODE -eq 0 -and $cache.Count -eq 1){$cacheRoot=$cache[0].Trim();$caches=@(Get-DcrT6Caches $cacheRoot | Select-Object id,version,token)} }catch{}
 $recoveryKnown=$false;$backups=@()
 try{$backups=@(Get-DcrRecoveryInventory (Join-Path $env:LOCALAPPDATA 'DCRManager-state') $cacheRoot);$recoveryKnown=$true}catch{}
-$logScan=Get-DcrBoundedLogs $cacheRoot
-[pscustomobject]@{
+$logScan=if($NativeDiagnostics){[pscustomobject]@{known=$false;logs=@()}}else{Get-DcrBoundedLogs $cacheRoot}
+$result=[ordered]@{
     logsKnown=$logScan.known
     recoveryKnown=$recoveryKnown
     caches=$caches
@@ -21,7 +22,9 @@ $logScan=Get-DcrBoundedLogs $cacheRoot
     installations=@(Get-DcrInstallInventory)
     processes=@(Get-DcrInventory)
     health=@(Get-DcrProcessHealth)
-    clients=@(Get-DcrClientAudit -IncludeMissing)
+    clients=@(Get-DcrClientAudit -IncludeMissing -OnlyToml:$NativeDiagnostics)
     logs=@($logScan.logs)
     backups=$backups
-} | ConvertTo-Json -Depth 8 -Compress
+}
+if($NativeDiagnostics){$result.nativeDiagnosticsSchema=1;$result.internalCacheRoot=$cacheRoot}
+[pscustomobject]$result | ConvertTo-Json -Depth 8 -Compress

@@ -20,3 +20,5 @@ Runtime state is outside the repository. The executable resolves its scripts fro
 ## Migration
 
 Go/Charm was adopted in v1.3 ahead of the original v1.4 evaluation. The preview still requires PowerShell for package, cache, recovery and read-only diagnostics. v1.4 will assess native replacements or embedded safe execution, portable packaging, reproducible releases and clean Windows acceptance. Preserve regression parity and Graphite Dark while migrating.
+
+The v1.4 development reader consumes a versioned internal bridge envelope for the remaining PowerShell fields. Go reads bounded npm log history and the six known JSON MCP files directly. The cache location is internal to the bridge exchange and is not serialized in public snapshots. Legacy invocation without the new switch retains v1.3 behavior.

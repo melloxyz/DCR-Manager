@@ -91,7 +91,7 @@ function Get-DcrCustomAudit([string]$Path){
     }catch{$status='unreadable-or-unsupported';$result=@()}
     [pscustomobject]@{status=$status;entries=$result.Count;modes=(@($result.mode|Select-Object -Unique)-join ',');floating=@($result|Where-Object floatingVersion).Count}
 }
-function Get-DcrClientAudit([switch]$IncludeMissing) {
+function Get-DcrClientAudit([switch]$IncludeMissing,[switch]$OnlyToml) {
     $candidates=@(
         @{client='Claude Desktop';path=(Join-Path $env:APPDATA 'Claude\claude_desktop_config.json');type='json'},
         @{client='Claude Code';path=(Join-Path $env:USERPROFILE '.claude.json');type='json'},
@@ -102,6 +102,7 @@ function Get-DcrClientAudit([switch]$IncludeMissing) {
         @{client='Codex';path=(Join-Path $env:USERPROFILE '.codex\config.toml');type='toml'}
     )
     foreach($c in $candidates){
+        if($OnlyToml -and $c.type -ne 'toml'){continue}
         try{
             $item=Get-Item -LiteralPath $c.path -Force -ErrorAction Stop
             if($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)){
