@@ -20,11 +20,11 @@ Escopo de produto fornecido pelo mantenedor em 2026-11-24. As etapas T1-T10 são
 
 ## v1.3.0 - Experiência de uso
 - Interface com navegação por teclado: implementada em Go/Charm v2, Graphite Dark.
-- Português e inglês: pendente.
+- Inglês: idioma único na v1.3.0, por decisão do mantenedor. Internacionalização adiada para avaliação futura.
 - Painel de saúde do sistema: implementado, diagnósticos locais.
 - Assistente de resolução de problemas: implementado; regras locais e recomendações sem execução automática.
-- Instalação inicial guiada: pendente.
-- Gerenciamento de inicialização com Windows: pendente.
+- Instalação inicial guiada: implementada; pré-requisitos, navegação para instalação confirmada e conexão, com opção de concluir ou pular.
+- Gerenciamento de inicialização com Windows: implementado; registro por usuário, opt-in e reversível; validação em login real pendente.
 
 ### Plano interno atualizado
 | Etapa | Entrega | Estado |
@@ -37,7 +37,7 @@ Escopo de produto fornecido pelo mantenedor em 2026-11-24. As etapas T1-T10 são
 | T6 | Pacotes e cache | Implementada; npm real isolado pendente |
 | T7 | Backups, recuperação, inventário de estágios e retenção | Implementada; restauração real isolada pendente |
 | T8 | Auditoria MCP, logs e assistente de resolução de problemas | Implementada; validação de UX pendente |
-| T9 | Configurações, pt-BR/en, instalação inicial guiada e inicialização com Windows (opt-in e reversível) | Pendente |
+| T9 | Configurações persistentes, onboarding em inglês e inicialização com Windows (opt-in e reversível) | Implementada; aceitação visual e login real pendentes |
 | T10 | Aceitação funcional, UX, regressões, validação de lifecycle e empacotamento de preview | Pendente |
 
 ## v1.4.0 - Distribuição

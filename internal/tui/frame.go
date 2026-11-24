@@ -60,7 +60,7 @@ func (m Model) View() tea.View {
 	if w < 90 {
 		hint = " 1-9 Pages  H Help  R Refresh  Q Quit"
 	}
-	if m.pending != "" || m.maintenancePending.Action != "" {
+	if m.pending != "" || m.maintenancePending.Action != "" || m.settingsPending.Kind != "" {
 		hint = " Y Confirm   N/Esc Cancel"
 	} else if m.busy {
 		hint = " Operation in progress..."
@@ -78,6 +78,13 @@ func (m Model) View() tea.View {
 			hint = " D Next  G Open page  L Logs  R Refresh  Q Quit"
 		} else {
 			hint = " F Filter  H Troubleshoot  R Refresh  Q Quit"
+		}
+	}
+	if m.page == 8 && !m.busy && m.settingsPending.Kind == "" && m.settingsOperator != nil {
+		if m.onboarding {
+			hint = " I Packages  C Connection  F Finish  O Settings"
+		} else {
+			hint = " P Landing  A Manager  W Remote  X Disable  O Setup"
 		}
 	}
 	footer := paintRow(label(ansi.Truncate(hint, max(1, w-len(focus)-3), "…"))+"  "+label(focus), w, "#171717")

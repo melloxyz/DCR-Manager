@@ -36,3 +36,5 @@ T6 preview: Packages (P repair/install, U update), Cache (C select next, Z quara
 T7 preview: Recovery (B next item, V restore; Y confirm, N/Esc cancel). Shows validated package/cache backups, transaction stages, logical file size and advisory retention review. No automatic deletion. See docs/RECOVERY.md and docs/ROADMAP.md for the official product scope.
 
 T8 preview: H opens Troubleshooting, D cycles findings, G opens the suggested page (no automatic repair), L returns to Logs, F filters npm history. MCP Clients reports known-location audit status and launch modes. Diagnostics are local and advisory; no Remote cloud connectivity claim.
+
+T9 preview: English-only interface. Settings persists the landing page (P), guided first-run completion (O/F), and supports explicit Windows startup registration (A manager, W Remote, X disable, Y confirm). E reloads settings. First-run setup guides the user to existing confirmed package and connection actions. No automatic setup or startup registration. --settings prints read-only preference/registration status. See docs/TUI-MIGRATION.md.

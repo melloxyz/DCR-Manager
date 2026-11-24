@@ -27,6 +27,11 @@ var yellow = lg.Color("#E3B341")
 var red = lg.Color("#E57373")
 
 type Model struct {
+	settings                    app.Settings
+	settingsOperator            app.SettingsOperator
+	settingsPending             app.SettingsRequest
+	settingsNotice              string
+	onboarding                  bool
 	troubleshooting             bool
 	findingSelection, logFilter int
 	reader                      app.Reader
@@ -90,6 +95,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width, m.height = v.Width, v.Height
 		m.sync()
 		return m, nil
+	case settingsDone:
+		m.busy = false
+		m.settings = v.value
+		if v.err != nil {
+			m.settingsNotice = safe(v.err.Error())
+		} else {
+			m.settingsNotice = "Settings refreshed and verified."
+			if v.kind == "preferences" && m.settings.Preferences.OnboardingDone {
+				m.onboarding = false
+			}
+		}
+		m.sync()
+		return m, nil
 	case maintenanceDone:
 		m.busy = false
 		m.maintenancePending = app.MaintenanceRequest{}
@@ -136,7 +154,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.sync()
 		return m, nil
 	case tea.MouseClickMsg:
-		if m.busy || m.pending != "" || m.maintenancePending.Action != "" {
+		if m.busy || m.pending != "" || m.maintenancePending.Action != "" || m.settingsPending.Kind != "" {
 			return m, nil
 		}
 		mouse := v.Mouse()
@@ -305,8 +323,7 @@ func (m Model) content(w int) string {
 	case 7:
 		out += m.logsContent(w)
 	case 8:
-		out += "\n" + panel(w, strings.Join([]string{line(w-4, label("Theme"), "Graphite Dark"), line(w-4, label("Language"), "English"), line(w-4, label("Telemetry"), "None"), line(w-4, label("Backend"), "Native lifecycle + PS diagnostics"), line(w-4, label("Build"), Version)}, "\n"))
-		out += "\n\n" + label("Preferences are read-only in this development build.")
+		out += m.settingsContent(w)
 	}
 	return out
 }
