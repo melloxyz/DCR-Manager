@@ -56,9 +56,9 @@ func (m Model) View() tea.View {
 	if m.focus {
 		focus = "Content"
 	}
-	hint := " Up/Down Navigate   Tab Focus   PgUp/PgDn Scroll   R Refresh   Q Quit"
+	hint := " Up/Down Navigate  Tab Focus  H Help  R Refresh  Q Quit"
 	if w < 90 {
-		hint = " 1-9 Pages  Tab Focus  R Refresh  Q Quit"
+		hint = " 1-9 Pages  H Help  R Refresh  Q Quit"
 	}
 	if m.pending != "" || m.maintenancePending.Action != "" {
 		hint = " Y Confirm   N/Esc Cancel"
@@ -72,6 +72,13 @@ func (m Model) View() tea.View {
 		hint = " C Next cache  Z Quarantine  R Refresh  Q Quit"
 	} else if m.page == 5 && m.maintainer != nil {
 		hint = " B Next item  V Restore  R Refresh  Q Quit"
+	}
+	if m.page == 7 && !m.busy && m.pending == "" && m.maintenancePending.Action == "" {
+		if m.troubleshooting {
+			hint = " D Next  G Open page  L Logs  R Refresh  Q Quit"
+		} else {
+			hint = " F Filter  H Troubleshoot  R Refresh  Q Quit"
+		}
 	}
 	footer := paintRow(label(ansi.Truncate(hint, max(1, w-len(focus)-3), "…"))+"  "+label(focus), w, "#171717")
 	rows = append(rows, footer)

@@ -72,24 +72,12 @@ func (m Model) clientsContent(w int) string {
 		status := stateText("Checked", true)
 		if p.Status != "checked" {
 			status = colorText("Not assessed", "#E3B341")
+			if p.Status == "not-found" {
+				status = label("Not found")
+			}
 		}
-		rows = append(rows, line(w-4, bold(safe(p.Client)), status), label(fmt.Sprintf("%d direct reference(s) / %d floating version(s)", p.Entries, p.Floating)))
+		rows = append(rows, line(w-4, bold(safe(p.Client)), status), label(fmt.Sprintf("%d DCR reference(s) / %d floating", p.Entries, p.Floating)), label("Mode: "+safe(p.Modes)+" / "+safe(p.Status)))
 		rows = append(rows, "")
 	}
 	return "\n" + panel(w, strings.Join(rows[:len(rows)-1], "\n")) + "\n\n" + label("Read-only audit. Plugins and custom locations may not be detected.")
-}
-func (m Model) logsContent(w int) string {
-	if len(m.data.Logs) == 0 {
-		return emptyCard(w, "No matching npm logs", "Only retained, matching logs are displayed.")
-	}
-	rows := []string{}
-	for _, p := range m.data.Logs {
-		codes := strings.Join(p.Codes, ", ")
-		v := label("No known error code")
-		if codes != "" {
-			v = colorText(safe(codes), "#E57373")
-		}
-		rows = append(rows, label(safe(p.Name)), v, "")
-	}
-	return "\n" + panel(w, strings.Join(rows[:len(rows)-1], "\n"))
 }

@@ -27,8 +27,9 @@ type Client struct {
 	Entries, Floating     int
 }
 type Log struct {
-	Name  string
-	Codes []string
+	ModifiedUTC string
+	Name        string
+	Codes       []string
 }
 type Backup struct {
 	Kind, Version, Status, Token string
@@ -39,6 +40,7 @@ type Backup struct {
 	Review                       bool
 }
 type Snapshot struct {
+	LogsKnown           bool
 	RecoveryKnown       bool
 	ProcessControlReady bool
 	ProcessControlIssue string

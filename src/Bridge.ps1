@@ -6,11 +6,14 @@ Import-Module (Join-Path $PSScriptRoot 'Operations.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'Maintenance.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'PackageCache.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'RecoveryCenter.psm1')
+Import-Module (Join-Path $PSScriptRoot 'Diagnostics.psm1')
 $cacheRoot="";$caches=@()
 try{ $npm=Get-Command npm.cmd -ErrorAction Stop; $cache=@(& $npm.Source config get cache 2>$null); if($LASTEXITCODE -eq 0 -and $cache.Count -eq 1){$cacheRoot=$cache[0].Trim();$caches=@(Get-DcrT6Caches $cacheRoot | Select-Object id,version,token)} }catch{}
 $recoveryKnown=$false;$backups=@()
 try{$backups=@(Get-DcrRecoveryInventory (Join-Path $env:LOCALAPPDATA 'DCRManager-state') $cacheRoot);$recoveryKnown=$true}catch{}
+$logScan=Get-DcrBoundedLogs $cacheRoot
 [pscustomobject]@{
+    logsKnown=$logScan.known
     recoveryKnown=$recoveryKnown
     caches=$caches
     status=Get-DcrStatus
@@ -18,7 +21,7 @@ try{$backups=@(Get-DcrRecoveryInventory (Join-Path $env:LOCALAPPDATA 'DCRManager
     installations=@(Get-DcrInstallInventory)
     processes=@(Get-DcrInventory)
     health=@(Get-DcrProcessHealth)
-    clients=@(Get-DcrClientAudit)
-    logs=@(Get-DcrLogSummary)
+    clients=@(Get-DcrClientAudit -IncludeMissing)
+    logs=@($logScan.logs)
     backups=$backups
 } | ConvertTo-Json -Depth 8 -Compress

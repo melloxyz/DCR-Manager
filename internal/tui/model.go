@@ -27,22 +27,24 @@ var yellow = lg.Color("#E3B341")
 var red = lg.Color("#E57373")
 
 type Model struct {
-	reader                app.Reader
-	operator              app.RemoteOperator
-	maintainer            app.Maintainer
-	maintenancePending    app.MaintenanceRequest
-	maintenanceNotice     string
-	cacheSelection        int
-	backupSelection       int
-	pending               app.RemoteAction
-	busy                  bool
-	actionNotice          string
-	data                  app.Snapshot
-	ready, loading, focus bool
-	err                   string
-	page, width, height   int
-	vp                    viewport.Model
-	updated               time.Time
+	troubleshooting             bool
+	findingSelection, logFilter int
+	reader                      app.Reader
+	operator                    app.RemoteOperator
+	maintainer                  app.Maintainer
+	maintenancePending          app.MaintenanceRequest
+	maintenanceNotice           string
+	cacheSelection              int
+	backupSelection             int
+	pending                     app.RemoteAction
+	busy                        bool
+	actionNotice                string
+	data                        app.Snapshot
+	ready, loading, focus       bool
+	err                         string
+	page, width, height         int
+	vp                          viewport.Model
+	updated                     time.Time
 }
 type resultMsg struct {
 	data app.Snapshot
@@ -126,6 +128,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.data = v.data
 			m.cacheSelection = 0
 			m.backupSelection = 0
+			m.findingSelection = 0
 			m.ready = true
 			m.updated = time.Now()
 			m.err = ""
@@ -143,6 +146,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.KeyPressMsg:
 		if next, cmd, handled := m.actionKey(v.String()); handled {
+			return next, cmd
+		}
+		if next, cmd, handled := m.diagnosticKey(v.String()); handled {
 			return next, cmd
 		}
 		switch v.String() {
@@ -217,6 +223,10 @@ func metric(w int, title, val, desc, c string) string {
 func (m Model) content(w int) string {
 	heading := []string{"System overview", "Connection", "Packages", "Processes", "Cache manager", "Recovery center", "MCP clients", "Diagnostic logs", "Settings"}[m.page]
 	desc := []string{"Monitor your Desktop Commander environment.", "Local Remote process status and session inventory.", "Installed package versions and runtime requirements.", "Inspect the DCR process tree.", "Find exclusive Desktop Commander npm caches.", "Review preserved backups and recovery options.", "Read-only audit of known user configurations.", "Sanitized npm error history.", "Graphite Dark / workspace preferences."}[m.page]
+	if m.page == 7 && m.troubleshooting {
+		heading = "Troubleshooting"
+		desc = "Local evidence and guided next steps."
+	}
 	out := label("Workspace / "+pages[m.page]) + "\n\n" + bold(heading) + "\n" + label(desc) + "\n"
 	if m.loading {
 		out += "\n" + colorText("Refreshing diagnostics…", "#E3B341") + "\n"
@@ -275,6 +285,7 @@ func (m Model) content(w int) string {
 			install = "Detected"
 		}
 		out += section("System health") + panel(w, strings.Join([]string{line(w-4, label("Node.js"), safe(m.data.Runtime.Node)), line(w-4, label("npm"), safe(m.data.Runtime.Npm)), line(w-4, label("Process tree"), health), line(w-4, label("Installation"), install)}, "\n")) + "\n"
+		out += "\n" + panel(w, bold("[H] Troubleshooting")+"\n"+label("Review findings and suggested next steps."))
 		out += section("Quick navigation") + quickLinks(w) + "\n"
 		if s.CacheCandidates > 0 {
 			out += "\n" + colorText("Maintenance available", "#E3B341") + "  " + label("Legacy npm cache detected. Press 5 to inspect.")

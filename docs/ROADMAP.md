@@ -22,7 +22,7 @@ Escopo de produto fornecido pelo mantenedor em 2026-11-24. As etapas T1-T10 são
 - Interface com navegação por teclado: implementada em Go/Charm v2, Graphite Dark.
 - Português e inglês: pendente.
 - Painel de saúde do sistema: implementado, diagnósticos locais.
-- Assistente de resolução de problemas: pendente.
+- Assistente de resolução de problemas: implementado; regras locais e recomendações sem execução automática.
 - Instalação inicial guiada: pendente.
 - Gerenciamento de inicialização com Windows: pendente.
 
@@ -36,7 +36,7 @@ Escopo de produto fornecido pelo mantenedor em 2026-11-24. As etapas T1-T10 são
 | T5 | Controle nativo de processos Windows | Implementada; reconexão real pendente |
 | T6 | Pacotes e cache | Implementada; npm real isolado pendente |
 | T7 | Backups, recuperação, inventário de estágios e retenção | Implementada; restauração real isolada pendente |
-| T8 | Auditoria MCP, logs e assistente de resolução de problemas | Pendente |
+| T8 | Auditoria MCP, logs e assistente de resolução de problemas | Implementada; validação de UX pendente |
 | T9 | Configurações, pt-BR/en, instalação inicial guiada e inicialização com Windows (opt-in e reversível) | Pendente |
 | T10 | Aceitação funcional, UX, regressões, validação de lifecycle e empacotamento de preview | Pendente |
 

@@ -1,4 +1,4 @@
-﻿Import-Module (Join-Path $PSScriptRoot 'Core.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'Core.psm1') -Force
 function Test-DcrArgument([string]$Value){
     return ($Value -match '^@wonderwhy-er/desktop-commander(?:@[^@\s]+)?$' -or $Value -match '(?i)[\\/]+@wonderwhy-er[\\/]+desktop-commander[\\/]+')
 }
@@ -91,7 +91,7 @@ function Get-DcrCustomAudit([string]$Path){
     }catch{$status='unreadable-or-unsupported';$result=@()}
     [pscustomobject]@{status=$status;entries=$result.Count;modes=(@($result.mode|Select-Object -Unique)-join ',');floating=@($result|Where-Object floatingVersion).Count}
 }
-function Get-DcrClientAudit {
+function Get-DcrClientAudit([switch]$IncludeMissing) {
     $candidates=@(
         @{client='Claude Desktop';path=(Join-Path $env:APPDATA 'Claude\claude_desktop_config.json');type='json'},
         @{client='Claude Code';path=(Join-Path $env:USERPROFILE '.claude.json');type='json'},
@@ -102,7 +102,19 @@ function Get-DcrClientAudit {
         @{client='Codex';path=(Join-Path $env:USERPROFILE '.codex\config.toml');type='toml'}
     )
     foreach($c in $candidates){
-        if(!(Test-Path -LiteralPath $c.path -PathType Leaf)){continue}
+        try{
+            $item=Get-Item -LiteralPath $c.path -Force -ErrorAction Stop
+            if($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)){
+                if($IncludeMissing){[pscustomobject]@{client=$c.client;status='unreadable-or-unsupported';entries=0;modes='';floating=0}}
+                continue
+            }
+        }catch{
+            if($IncludeMissing){
+                $status=if($_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound){'not-found'}else{'unreadable-or-unsupported'}
+                [pscustomobject]@{client=$c.client;status=$status;entries=0;modes='';floating=0}
+            }
+            continue
+        }
         $r=Get-DcrCustomAudit $c.path
         [pscustomobject]@{client=$c.client;status=$r.status;entries=$r.entries;modes=$r.modes;floating=$r.floating}
     }

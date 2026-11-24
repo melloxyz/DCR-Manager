@@ -34,3 +34,5 @@ The development preview now exposes Remote lifecycle actions on Connection (S / 
 T6 preview: Packages (P repair/install, U update), Cache (C select next, Z quarantine), Y confirm and N/Esc cancel. Package operations stage with a separate npm cache and retain backups; cache quarantine moves only verified DCR candidates. Stop DCR/MCP clients before replacing package files. See docs/TUI-MIGRATION.md for scope, tests and limitations.
 
 T7 preview: Recovery (B next item, V restore; Y confirm, N/Esc cancel). Shows validated package/cache backups, transaction stages, logical file size and advisory retention review. No automatic deletion. See docs/RECOVERY.md and docs/ROADMAP.md for the official product scope.
+
+T8 preview: H opens Troubleshooting, D cycles findings, G opens the suggested page (no automatic repair), L returns to Logs, F filters npm history. MCP Clients reports known-location audit status and launch modes. Diagnostics are local and advisory; no Remote cloud connectivity claim.
