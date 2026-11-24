@@ -93,8 +93,7 @@ function Invoke-DcrT6Package([string]$Root,[string]$State,[string]$Action,[strin
     & $Guard $Root
     Assert-DcrPackageOwnership $Root
     if((Get-DcrT6Version $Root) -ne $Expected){throw 'STALE'}
-    Switch-DcrPackageFiles $Root $stage $backup
-    if((Get-DcrT6Version $Root) -ne $v){throw 'ROLLBACK'}
+    Switch-DcrTrackedPackage $Root $stage $backup $v
 }
 function Get-DcrT6ErrorCode($Record){
     $msg=$Record.Exception.Message
@@ -108,4 +107,23 @@ function Get-DcrT6ErrorCode($Record){
     }
     return 'FAILED'
 }
-Export-ModuleMember -Function Get-DcrT6Caches,Move-DcrT6Cache,Invoke-DcrT6Package,Get-DcrT6Version,Get-DcrT6ErrorCode
+function Switch-DcrTrackedPackage([string]$Root,[string]$Stage,[string]$Backup,[string]$Version,[scriptblock]$MoveAction={param($from,$to) Move-Item -LiteralPath $from -Destination $to -ErrorAction Stop}){
+    $journal=Join-Path $Stage 'transaction.json'
+    function Write-State([string]$Status){
+        $tmp=$journal+'.tmp'
+        [pscustomobject]@{schema=1;state=$Status;backup=[IO.Path]::GetFileName($Backup);version=$Version}|ConvertTo-Json -Compress|Set-Content -LiteralPath $tmp -Encoding UTF8 -ErrorAction Stop
+        if([IO.File]::Exists($journal)){[IO.File]::Replace($tmp,$journal,($journal+'.previous'))}else{[IO.File]::Move($tmp,$journal)}
+    }
+    Write-State 'switching'
+    try{
+        Switch-DcrPackageFiles $Root $Stage $Backup -MoveAction $MoveAction
+        if((Get-DcrT6Version $Root) -ne $Version){throw 'ROLLBACK'}
+    }catch{
+        $original=$_
+        $status=if((Get-DcrT6ErrorCode $original) -eq 'ROLLBACK'){'rollback-incomplete'}else{'switch-failed'}
+        try{Write-State $status}catch{}
+        throw $original
+    }
+    Write-State 'completed'
+}
+Export-ModuleMember -Function Get-DcrT6Caches,Move-DcrT6Cache,Invoke-DcrT6Package,Get-DcrT6Version,Get-DcrT6ErrorCode,Assert-DcrPlainPath,Assert-DcrPackageOwnership,Switch-DcrTrackedPackage

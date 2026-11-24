@@ -70,6 +70,8 @@ func (m Model) View() tea.View {
 		hint = " P Repair/Install  U Update  R Refresh  Q Quit"
 	} else if m.page == 4 && m.maintainer != nil {
 		hint = " C Next cache  Z Quarantine  R Refresh  Q Quit"
+	} else if m.page == 5 && m.maintainer != nil {
+		hint = " B Next item  V Restore  R Refresh  Q Quit"
 	}
 	footer := paintRow(label(ansi.Truncate(hint, max(1, w-len(focus)-3), "…"))+"  "+label(focus), w, "#171717")
 	rows = append(rows, footer)

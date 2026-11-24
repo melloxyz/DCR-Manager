@@ -63,20 +63,6 @@ func (m Model) cacheContent(w int) string {
 	}
 	return m.maintenancePanel(w) + out
 }
-func (m Model) recoveryContent(w int) string {
-	out := ""
-	if len(m.data.Backups) == 0 {
-		out += emptyCard(w, "No backups detected", "Package and cache backups will appear here.")
-	}
-	for _, p := range m.data.Backups {
-		review := label("Retained")
-		if p.Review {
-			review = colorText("Review", "#E3B341")
-		}
-		out += "\n" + panel(w, line(w-4, bold("Backup"), review)+"\n"+safe(p.Name)+"\n"+label(fmt.Sprintf("%d days old", p.AgeDays))) + "\n"
-	}
-	return out + legacyNotice(w, "Restore validated backups and review rollback options.")
-}
 func (m Model) clientsContent(w int) string {
 	if len(m.data.Clients) == 0 {
 		return emptyCard(w, "No known client configurations", "Custom locations are not automatically scanned.")

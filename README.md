@@ -32,3 +32,5 @@ On feat/v1.3-tui, run Launch-TUI.cmd for the new Graphite Dark Go TUI. Build-TUI
 The development preview now exposes Remote lifecycle actions on Connection (S / X / T); stop and restart require confirmation. Remote lifecycle now uses native Windows APIs in Go; read-only package and client diagnostics still use the PowerShell bridge. See docs/TUI-MIGRATION.md for verification limits and docs/SKILLS.md for project-scoped skills.
 
 T6 preview: Packages (P repair/install, U update), Cache (C select next, Z quarantine), Y confirm and N/Esc cancel. Package operations stage with a separate npm cache and retain backups; cache quarantine moves only verified DCR candidates. Stop DCR/MCP clients before replacing package files. See docs/TUI-MIGRATION.md for scope, tests and limitations.
+
+T7 preview: Recovery (B next item, V restore; Y confirm, N/Esc cancel). Shows validated package/cache backups, transaction stages, logical file size and advisory retention review. No automatic deletion. See docs/RECOVERY.md and docs/ROADMAP.md for the official product scope.

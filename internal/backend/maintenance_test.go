@@ -42,3 +42,20 @@ func TestMaintenanceErrorsAreSanitized(t *testing.T) {
 		t.Fatal("raw output exposed")
 	}
 }
+
+func TestRecoveryRequestValidation(t *testing.T) {
+	token := strings.Repeat("a", 64)
+	good := app.MaintenanceRequest{Action: app.RestoreBackup, Expected: token, CacheID: "package-backup-" + strings.Repeat("a", 32), CurrentVersion: "0.3.4"}
+	args, err := maintenanceArgs(good)
+	if err != nil || !strings.Contains(strings.Join(args, " "), "-CurrentVersion 0.3.4") {
+		t.Fatal(args, err)
+	}
+	good.CurrentVersion = "--force"
+	if _, err = maintenanceArgs(good); err == nil {
+		t.Fatal("invalid current version accepted")
+	}
+	good.CacheID = "stage-" + strings.Repeat("a", 32)
+	if _, err = maintenanceArgs(good); err == nil {
+		t.Fatal("stage accepted for restore")
+	}
+}

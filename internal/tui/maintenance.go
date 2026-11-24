@@ -15,6 +15,9 @@ func (m Model) maintenanceAllowed(a app.MaintenanceAction) bool {
 		return false
 	}
 	s := m.data.Status
+	if a == app.RestoreBackup {
+		return m.recoveryAllowed()
+	}
 	if a == app.QuarantineCache {
 		return s.NpmAvailable && s.CacheKnown && len(m.data.Caches) > 0 && len(m.data.Caches) == s.CacheCandidates
 	}
@@ -36,7 +39,8 @@ func (m Model) maintenanceKey(k string) (Model, tea.Cmd, bool) {
 		case "y":
 			req := m.maintenancePending
 			m.maintenancePending = app.MaintenanceRequest{}
-			if !m.maintenanceAllowed(req.Action) {
+			b, _ := m.selectedBackup()
+			if !m.maintenanceAllowed(req.Action) || (req.Action == app.RestoreBackup && !recoveryRequestMatches(req, b)) {
 				m.maintenanceNotice = "Action unavailable; refresh or resize."
 				m.sync()
 				return m, nil, true
@@ -55,6 +59,12 @@ func (m Model) maintenanceKey(k string) (Model, tea.Cmd, bool) {
 		m.sync()
 		return m, nil, true
 	}
+	if m.page == 5 && k == "b" && len(m.data.Backups) > 0 {
+		m.backupSelection = (m.backupSelection + 1) % len(m.data.Backups)
+		m.vp.GotoTop()
+		m.sync()
+		return m, nil, true
+	}
 	var a app.MaintenanceAction
 	if m.page == 2 {
 		switch k {
@@ -66,6 +76,9 @@ func (m Model) maintenanceKey(k string) (Model, tea.Cmd, bool) {
 	}
 	if m.page == 4 && k == "z" {
 		a = app.QuarantineCache
+	}
+	if m.page == 5 && k == "v" {
+		a = app.RestoreBackup
 	}
 	if a == "" {
 		return m, nil, false
@@ -81,6 +94,12 @@ func (m Model) maintenanceKey(k string) (Model, tea.Cmd, bool) {
 		c := m.data.Caches[m.cacheSelection%len(m.data.Caches)]
 		req.CacheID = c.ID
 		req.Expected = c.Token
+	}
+	if a == app.RestoreBackup {
+		b, _ := m.selectedBackup()
+		req.CacheID = b.Name
+		req.Expected = b.Token
+		req.CurrentVersion = m.data.Status.Version
 	}
 	if a == app.RepairPackage && req.Expected == "unknown" {
 		m.maintenanceNotice = "Version unknown. Use explicit update instead."
@@ -98,6 +117,9 @@ func (m Model) maintenanceOverlay(w int) string {
 		return "\n" + panel(w, colorText("Maintenance in progress...", "#E3B341")+"\n"+label("Staging or verifying files. Do not close this window."))
 	}
 	req := m.maintenancePending
+	if req.Action == app.RestoreBackup {
+		return m.recoveryConfirmation(w)
+	}
 	title, desc := "Repair package", "Reinstall the confirmed version: "+safe(req.Expected)
 	switch req.Action {
 	case app.RepairPackage:

@@ -1,7 +1,8 @@
 param(
- [Parameter(Mandatory)][ValidateSet('repair','update','quarantine')][string]$Action,
+ [Parameter(Mandatory)][ValidateSet('repair','update','quarantine','restore')][string]$Action,
  [Parameter(Mandatory)][ValidatePattern('^(absent|unknown|[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?|[a-f0-9]{64})$')][string]$Expected,
- [ValidatePattern('^([a-f0-9]{8,64})?$')][string]$CacheID=''
+ [ValidatePattern('^([a-f0-9]{8,64}|(?:package|cache)-backup-[a-f0-9]{32})?$')][string]$CacheID='',
+ [ValidatePattern('^(absent|unknown|[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?)?$')][string]$CurrentVersion=''
 )
 $ErrorActionPreference='Stop'
 $WarningPreference='SilentlyContinue'
@@ -16,7 +17,25 @@ $code=''
 try{
  try{$owned=$mutex.WaitOne(0)}catch [System.Threading.AbandonedMutexException]{$owned=$true}
  if(!$owned){throw 'LOCKED'}
- if($Action -eq 'quarantine'){
+ if($Action -eq 'restore'){
+    Import-Module (Join-Path $PSScriptRoot 'RecoveryCenter.psm1')
+    $cacheRoot=''
+    if($CacheID.StartsWith('cache-backup-')){
+        $npm=(Get-Command npm.cmd -ErrorAction Stop).Source
+        $out=@(& $npm config get cache 2>$null)
+        if($LASTEXITCODE -ne 0 -or $out.Count -ne 1 -or ![IO.Path]::IsPathRooted($out[0])){throw 'UNSAFE'}
+        $cacheRoot=$out[0].Trim()
+    }elseif((Get-DcrT6Version $root) -ne $CurrentVersion){throw 'STALE'}
+    Invoke-DcrRecoveryRestore $root $state $cacheRoot $CacheID $Expected {
+        param($path)
+        foreach($p in Get-CimInstance Win32_Process -ErrorAction Stop){
+            if($p.ProcessId -eq $PID){continue}
+            if($p.Name -eq 'node.exe' -and (!$p.CommandLine -or $p.CommandLine -match '(?i)@wonderwhy-er[\\/]desktop-commander[\\/]|node_modules[\\/]\.bin[\\/]desktop-commander(?:\s|"|$)')){throw 'ACTIVE'}
+            if($p.CommandLine -and $p.CommandLine.IndexOf($path,[StringComparison]::OrdinalIgnoreCase) -ge 0){throw 'ACTIVE'}
+        }
+        if($CacheID.StartsWith('package-backup-') -and (Get-DcrT6Version $root) -ne $CurrentVersion){throw 'STALE'}
+    }
+ }elseif($Action -eq 'quarantine'){
     $npm=(Get-Command npm.cmd -ErrorAction Stop).Source
     $out=@(& $npm config get cache 2>$null)
     if($LASTEXITCODE -ne 0 -or $out.Count -ne 1 -or ![IO.Path]::IsPathRooted($out[0])){throw 'UNSAFE'}

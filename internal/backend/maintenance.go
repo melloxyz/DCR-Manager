@@ -22,6 +22,13 @@ func maintenanceArgs(r app.MaintenanceRequest) ([]string, error) {
 		if r.CacheID != "" || (!versionPattern.MatchString(r.Expected) && r.Expected != "absent" && !(r.Action == app.UpdatePackage && r.Expected == "unknown")) {
 			return nil, errors.New("invalid package version expectation")
 		}
+	case app.RestoreBackup:
+		if !regexp.MustCompile("^(package|cache)-backup-[a-f0-9]{32}$").MatchString(r.CacheID) || !cacheTokenPattern.MatchString(r.Expected) {
+			return nil, errors.New("invalid backup identity")
+		}
+		if strings.HasPrefix(r.CacheID, "package-") && !versionPattern.MatchString(r.CurrentVersion) && r.CurrentVersion != "absent" && r.CurrentVersion != "unknown" {
+			return nil, errors.New("invalid current version")
+		}
 	case app.QuarantineCache:
 		if !cacheIDPattern.MatchString(r.CacheID) || !cacheTokenPattern.MatchString(r.Expected) {
 			return nil, errors.New("invalid cache identity")
@@ -32,6 +39,9 @@ func maintenanceArgs(r app.MaintenanceRequest) ([]string, error) {
 	args := []string{"-Action", string(r.Action), "-Expected", r.Expected}
 	if r.CacheID != "" {
 		args = append(args, "-CacheID", r.CacheID)
+	}
+	if r.Action == app.RestoreBackup && strings.HasPrefix(r.CacheID, "package-") {
+		args = append(args, "-CurrentVersion", r.CurrentVersion)
 	}
 	return args, nil
 }

@@ -31,11 +31,15 @@ type Log struct {
 	Codes []string
 }
 type Backup struct {
-	Name    string
-	AgeDays int
-	Review  bool
+	Kind, Version, Status, Token string
+	Bytes                        int64
+	SizeKnown                    bool
+	Name                         string
+	AgeDays                      int
+	Review                       bool
 }
 type Snapshot struct {
+	RecoveryKnown       bool
 	ProcessControlReady bool
 	ProcessControlIssue string
 	Status              Status

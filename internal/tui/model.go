@@ -33,6 +33,7 @@ type Model struct {
 	maintenancePending    app.MaintenanceRequest
 	maintenanceNotice     string
 	cacheSelection        int
+	backupSelection       int
 	pending               app.RemoteAction
 	busy                  bool
 	actionNotice          string
@@ -124,6 +125,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.data = v.data
 			m.cacheSelection = 0
+			m.backupSelection = 0
 			m.ready = true
 			m.updated = time.Now()
 			m.err = ""
