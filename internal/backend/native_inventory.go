@@ -97,7 +97,11 @@ func cacheCandidate(dir string, info os.FileInfo, version string, manifest []byt
 		return app.CacheCandidate{}, false
 	}
 	// Match the PowerShell T6 token while its mutation engine is still in use.
-	identity := fmt.Sprintf("%s|%d|%X|%s", strings.ToLower(dir), ticks, sha256.Sum256(manifest), version)
+	tokenPath, ok := legacyTokenPath(dir, info)
+	if !ok {
+		return app.CacheCandidate{}, false
+	}
+	identity := fmt.Sprintf("%s|%d|%X|%s", tokenPath, ticks, sha256.Sum256(manifest), version)
 	return app.CacheCandidate{ID: id, Version: version, Token: fmt.Sprintf("%x", sha256.Sum256([]byte(identity)))}, true
 }
 func scanInstallations(parent context.Context, local, global, cache string) installInventory {

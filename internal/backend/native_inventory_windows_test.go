@@ -8,6 +8,8 @@ import (
 	"dcr-manager/internal/app"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/sys/windows"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -29,7 +31,7 @@ func TestCacheTokenLegacyParity(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference='Stop'; $WarningPreference='SilentlyContinue'; $ProgressPreference='SilentlyContinue'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); Import-Module $env:DCR_TEST_MODULE; $probe=Get-FileHash -LiteralPath (Join-Path $env:DCR_TEST_CACHE '_npx/1234abcd/package.json') -Algorithm SHA256 -ErrorAction Stop; if(!$probe.Hash){throw 'hash probe failed'}; $d=Get-ChildItem -LiteralPath (Join-Path $env:DCR_TEST_CACHE '_npx') -Directory | Select-Object -First 1; [pscustomobject]@{rows=@(Get-DcrT6Caches $env:DCR_TEST_CACHE | Select-Object id,version,token);path=$d.FullName.ToLowerInvariant();created=[string]$d.CreationTimeUtc.Ticks;hash=$probe.Hash} | ConvertTo-Json -Depth 4 -Compress")
-	cmd.Env = append(legacyTestEnv(), "DCR_TEST_MODULE="+module, "DCR_TEST_CACHE="+cache)
+	cmd.Env = append(legacyPowerShellEnv(), "DCR_TEST_MODULE="+module, "DCR_TEST_CACHE="+cache)
 	configure(cmd)
 	out, e := cmd.Output()
 	if e != nil {
@@ -64,5 +66,41 @@ func TestCacheTokenLegacyParity(t *testing.T) {
 			t.Fatal(err)
 		}
 		t.Fatalf("cache parity: idMatch=%t versionMatch=%t pathMatch=%t pathLengths=%d/%d shortAlias=%t/%t ticksMatch=%t hashMatch=%t", legacy[0].ID == native.caches[0].ID, legacy[0].Version == native.caches[0].Version, strings.ToLower(dir) == probe.Path, len(dir), len(probe.Path), strings.Contains(dir, "~"), strings.Contains(probe.Path, "~"), fmt.Sprint(ticks) == probe.Created, fmt.Sprintf("%X", sha256.Sum256(raw)) == probe.Hash)
+	}
+}
+
+func TestLegacyTokenPathShortAlias(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "Long Directory For DCR Token Test")
+	if e := os.Mkdir(dir, 0700); e != nil {
+		t.Fatal(e)
+	}
+	info, e := plainInfo(dir)
+	if e != nil {
+		t.Fatal(e)
+	}
+	canonical, ok := legacyTokenPath(dir, info)
+	if !ok {
+		t.Fatal("canonical path unavailable")
+	}
+	ptr, e := windows.UTF16PtrFromString(dir)
+	if e != nil {
+		t.Fatal(e)
+	}
+	buf := make([]uint16, 32768)
+	n, e := windows.GetShortPathName(ptr, &buf[0], uint32(len(buf)))
+	if e != nil || n == 0 || n >= uint32(len(buf)) {
+		t.Skip("8.3 aliases unavailable on fixture volume")
+	}
+	alias := windows.UTF16ToString(buf[:n])
+	if strings.EqualFold(alias, dir) {
+		t.Skip("8.3 alias not generated on fixture volume")
+	}
+	aliasInfo, e := plainInfo(alias)
+	if e != nil {
+		t.Fatal(e)
+	}
+	actual, ok := legacyTokenPath(alias, aliasInfo)
+	if !ok || actual != canonical {
+		t.Fatal("short alias changed token identity")
 	}
 }

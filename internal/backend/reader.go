@@ -54,6 +54,7 @@ func Read(root string) app.Reader {
 		ctx, cancel := context.WithTimeout(parent, 45*time.Second)
 		defer cancel()
 		cmd := exec.CommandContext(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", filepath.Join(root, "src", "Bridge.ps1"), "-NativeInventory")
+		cmd.Env = legacyPowerShellEnv()
 		configure(cmd)
 		out, err := cmd.Output()
 		if ctx.Err() != nil {

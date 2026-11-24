@@ -87,7 +87,11 @@ func recoveryToken(path string, info os.FileInfo, m recoveryMeasure, version str
 		return "", errors.New("creation time unavailable")
 	}
 	modified := info.ModTime().Unix()*10000000 + int64(info.ModTime().Nanosecond()/100) + 621355968000000000
-	parts := []string{strings.ToLower(path), fmt.Sprint(created), fmt.Sprint(modified), fmt.Sprint(m.bytes), fmt.Sprint(m.count), version}
+	tokenPath, ok := legacyTokenPath(path, info)
+	if !ok {
+		return "", errors.New("canonical recovery path unavailable")
+	}
+	parts := []string{tokenPath, fmt.Sprint(created), fmt.Sprint(modified), fmt.Sprint(m.bytes), fmt.Sprint(m.count), version}
 	for _, name := range []string{"package.json", "package-lock.json", filepath.Join("node_modules", "@wonderwhy-er", "desktop-commander", "package.json")} {
 		raw, e := readPlainFile(filepath.Join(path, name), maxConfigBytes)
 		if os.IsNotExist(e) {

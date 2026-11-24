@@ -90,6 +90,7 @@ func Maintain(root string) app.Maintainer {
 		// npm fetch retries/timeouts are bounded in the script.
 		base := []string{"-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", filepath.Join(root, "src", "MaintenanceAction.ps1")}
 		cmd := exec.Command("powershell.exe", append(base, args...)...)
+		cmd.Env = legacyPowerShellEnv()
 		configure(cmd)
 		out, err := cmd.Output()
 		var result maintenanceResult

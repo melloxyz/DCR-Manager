@@ -10,6 +10,7 @@
 - Add native backup inventory, bounded recovery tree measurement, transaction journal inspection and legacy restore-token cross-checks.
 - Improve diagnostics of hosted cache-token parity failures without weakening the comparison.
 - Add native process inventory and parent health, full-set legacy reconciliation and independent native maintenance preflight.
+- Normalize Windows short-path aliases in legacy-compatible cache and recovery tokens; isolate legacy Windows PowerShell child module discovery.
 
 ## 1.3.1
 - Update checkout and setup-go to v7 (#1, #2).
