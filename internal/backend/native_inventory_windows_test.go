@@ -4,8 +4,10 @@ package backend
 
 import (
 	"context"
+	"crypto/sha256"
 	"dcr-manager/internal/app"
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -26,7 +28,7 @@ func TestCacheTokenLegacyParity(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference='Stop'; $WarningPreference='SilentlyContinue'; $ProgressPreference='SilentlyContinue'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); Import-Module $env:DCR_TEST_MODULE; $probe=Get-FileHash -LiteralPath (Join-Path $env:DCR_TEST_CACHE '_npx/1234abcd/package.json') -Algorithm SHA256 -ErrorAction Stop; if(!$probe.Hash){throw 'hash probe failed'}; ConvertTo-Json -InputObject @(Get-DcrT6Caches $env:DCR_TEST_CACHE | Select-Object id,version,token) -Compress")
+	cmd := exec.CommandContext(ctx, "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference='Stop'; $WarningPreference='SilentlyContinue'; $ProgressPreference='SilentlyContinue'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); Import-Module $env:DCR_TEST_MODULE; $probe=Get-FileHash -LiteralPath (Join-Path $env:DCR_TEST_CACHE '_npx/1234abcd/package.json') -Algorithm SHA256 -ErrorAction Stop; if(!$probe.Hash){throw 'hash probe failed'}; $d=Get-ChildItem -LiteralPath (Join-Path $env:DCR_TEST_CACHE '_npx') -Directory | Select-Object -First 1; [pscustomobject]@{rows=@(Get-DcrT6Caches $env:DCR_TEST_CACHE | Select-Object id,version,token);path=$d.FullName.ToLowerInvariant();created=[string]$d.CreationTimeUtc.Ticks;hash=$probe.Hash} | ConvertTo-Json -Depth 4 -Compress")
 	cmd.Env = append(legacyTestEnv(), "DCR_TEST_MODULE="+module, "DCR_TEST_CACHE="+cache)
 	configure(cmd)
 	out, e := cmd.Output()
@@ -36,14 +38,31 @@ func TestCacheTokenLegacyParity(t *testing.T) {
 		}
 		t.Fatal("legacy fixture query failed", e)
 	}
-	var legacy []app.CacheCandidate
-	if e := json.Unmarshal([]byte(strings.TrimPrefix(strings.TrimSpace(string(out)), "\uFEFF")), &legacy); e != nil {
+	var probe struct {
+		Rows                []app.CacheCandidate
+		Path, Created, Hash string
+	}
+	if e := json.Unmarshal([]byte(strings.TrimPrefix(strings.TrimSpace(string(out)), "\uFEFF")), &probe); e != nil {
 		t.Fatal("legacy cache JSON invalid", e)
 	}
+	legacy := probe.Rows
 	if len(legacy) != 1 {
 		t.Fatal("legacy cache fixture count", len(legacy))
 	}
 	if legacy[0] != native.caches[0] {
-		t.Fatalf("cache parity: idMatch=%t versionMatch=%t tokenMatch=%t", legacy[0].ID == native.caches[0].ID, legacy[0].Version == native.caches[0].Version, legacy[0].Token == native.caches[0].Token)
+		dir := filepath.Join(cache, "_npx", "1234abcd")
+		info, err := plainInfo(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ticks, ok := creationTicks(info)
+		if !ok {
+			t.Fatal("creation unavailable")
+		}
+		raw, err := readPlainFile(filepath.Join(dir, "package.json"), maxConfigBytes)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Fatalf("cache parity: idMatch=%t versionMatch=%t pathMatch=%t pathLengths=%d/%d shortAlias=%t/%t ticksMatch=%t hashMatch=%t", legacy[0].ID == native.caches[0].ID, legacy[0].Version == native.caches[0].Version, strings.ToLower(dir) == probe.Path, len(dir), len(probe.Path), strings.Contains(dir, "~"), strings.Contains(probe.Path, "~"), fmt.Sprint(ticks) == probe.Created, fmt.Sprintf("%X", sha256.Sum256(raw)) == probe.Hash)
 	}
 }
