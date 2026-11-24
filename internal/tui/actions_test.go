@@ -17,17 +17,18 @@ func actionKey(m Model, k rune) (Model, tea.Cmd) {
 func actionFixture() Model {
 	m := New(nil)
 	m.ready = true
+	m.data.ProcessControlReady = true
 	m.data.Status = app.Status{Version: "0.3.4", Installed: true, NodeAvailable: true, RemoteProcesses: 1, RemoteRoots: 1}
-	m.data.Processes = []app.Process{{PID: 123, Role: "Remote"}}
+	m.data.Processes = []app.Process{{PID: 123, Created: 100, Role: "Remote"}}
 	m.selectPage(1)
 	return m
 }
 func TestStopRequiresConfirmationAndIsAsync(t *testing.T) {
 	m := actionFixture()
 	calls := 0
-	m.operator = func(_ context.Context, a app.RemoteAction, pids []int) error {
+	m.operator = func(_ context.Context, a app.RemoteAction, pids []app.ProcessIdentity) error {
 		calls++
-		if a != app.Stop || len(pids) != 1 || pids[0] != 123 {
+		if a != app.Stop || len(pids) != 1 || pids[0] != (app.ProcessIdentity{PID: 123, Created: 100}) {
 			t.Fatal("wrong action target")
 		}
 		return nil
@@ -58,7 +59,10 @@ func TestStopRequiresConfirmationAndIsAsync(t *testing.T) {
 }
 func TestCancelDoesNotCallOperator(t *testing.T) {
 	m := actionFixture()
-	m.operator = func(context.Context, app.RemoteAction, []int) error { t.Fatal("operation executed"); return nil }
+	m.operator = func(context.Context, app.RemoteAction, []app.ProcessIdentity) error {
+		t.Fatal("operation executed")
+		return nil
+	}
 	m, _ = actionKey(m, 't')
 	m, cmd := actionKey(m, 'n')
 	if cmd != nil || m.pending != "" || m.busy {
@@ -67,7 +71,7 @@ func TestCancelDoesNotCallOperator(t *testing.T) {
 }
 func TestStaleSnapshotAndDuplicateStartRefused(t *testing.T) {
 	m := actionFixture()
-	m.operator = func(context.Context, app.RemoteAction, []int) error { return nil }
+	m.operator = func(context.Context, app.RemoteAction, []app.ProcessIdentity) error { return nil }
 	_, cmd := actionKey(m, 's')
 	if cmd != nil {
 		t.Fatal("duplicate start allowed")
@@ -80,7 +84,9 @@ func TestStaleSnapshotAndDuplicateStartRefused(t *testing.T) {
 }
 func TestFailureClearsBusyAndRequestsRefresh(t *testing.T) {
 	m := actionFixture()
-	m.operator = func(context.Context, app.RemoteAction, []int) error { return errors.New("test failure") }
+	m.operator = func(context.Context, app.RemoteAction, []app.ProcessIdentity) error {
+		return errors.New("test failure")
+	}
 	m.reader = func(context.Context) (app.Snapshot, error) { return app.Snapshot{}, nil }
 	m, _ = actionKey(m, 'x')
 	m, cmd := actionKey(m, 'y')
@@ -97,7 +103,7 @@ func TestStartIsAsyncAndOnlyAvailableWhenStopped(t *testing.T) {
 	m.data.Status.RemoteRoots = 0
 	m.data.Processes = nil
 	called := false
-	m.operator = func(_ context.Context, a app.RemoteAction, pids []int) error {
+	m.operator = func(_ context.Context, a app.RemoteAction, pids []app.ProcessIdentity) error {
 		called = true
 		if a != app.Start || len(pids) != 0 {
 			t.Fatal("invalid start request")
@@ -116,9 +122,40 @@ func TestStartIsAsyncAndOnlyAvailableWhenStopped(t *testing.T) {
 func TestConfirmationVisibleAtSmallTerminal(t *testing.T) {
 	m := actionFixture()
 	m.width, m.height = 55, 14
-	m.operator = func(context.Context, app.RemoteAction, []int) error { return nil }
+	m.operator = func(context.Context, app.RemoteAction, []app.ProcessIdentity) error { return nil }
 	m, _ = actionKey(m, 'x')
 	if !strings.Contains(ansi.Strip(m.View().Content), "Confirm") {
 		t.Fatal("confirmation not visible")
+	}
+}
+
+func TestNativeControlLockPreventsAction(t *testing.T) {
+	m := actionFixture()
+	m.data.ProcessControlReady = false
+	m.data.ProcessControlIssue = "Inventory mismatch"
+	m.operator = func(context.Context, app.RemoteAction, []app.ProcessIdentity) error {
+		t.Fatal("should not execute")
+		return nil
+	}
+	m, c := actionKey(m, 'x')
+	if c != nil || m.pending != "" {
+		t.Fatal("locked action allowed")
+	}
+	if !strings.Contains(ansi.Strip(m.vp.GetContent()), "Controls locked") {
+		t.Fatal("no lock explanation")
+	}
+}
+
+func TestResizeCannotConfirmHiddenAction(t *testing.T) {
+	m := actionFixture()
+	m.operator = func(context.Context, app.RemoteAction, []app.ProcessIdentity) error {
+		t.Fatal("hidden confirmation executed")
+		return nil
+	}
+	m, _ = actionKey(m, 'x')
+	n, _ := m.Update(tea.WindowSizeMsg{Width: 40, Height: 8})
+	m, c := actionKey(n.(Model), 'y')
+	if c != nil || m.pending != "" || m.busy {
+		t.Fatal("hidden confirmation permitted")
 	}
 }

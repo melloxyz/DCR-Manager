@@ -264,7 +264,7 @@ func (m Model) content(w int) string {
 	case 7:
 		out += m.logsContent(w)
 	case 8:
-		out += "\n" + panel(w, strings.Join([]string{line(w-4, label("Theme"), "Graphite Dark"), line(w-4, label("Language"), "English"), line(w-4, label("Telemetry"), "None"), line(w-4, label("Backend"), "PowerShell bridge"), line(w-4, label("Build"), Version)}, "\n"))
+		out += "\n" + panel(w, strings.Join([]string{line(w-4, label("Theme"), "Graphite Dark"), line(w-4, label("Language"), "English"), line(w-4, label("Telemetry"), "None"), line(w-4, label("Backend"), "Native lifecycle + PS diagnostics"), line(w-4, label("Build"), Version)}, "\n"))
 		out += "\n\n" + label("Preferences are read-only in this development build.")
 	}
 	return out

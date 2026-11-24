@@ -14,17 +14,17 @@ type actionResult struct {
 }
 
 func (m Model) WithOperator(op app.RemoteOperator) Model { m.operator = op; m.sync(); return m }
-func (m Model) remotePIDs() []int {
-	var ids []int
+func (m Model) remotePIDs() []app.ProcessIdentity {
+	var ids []app.ProcessIdentity
 	for _, p := range m.data.Processes {
 		if p.Role == "Remote" {
-			ids = append(ids, p.PID)
+			ids = append(ids, app.ProcessIdentity{PID: p.PID, Created: p.Created})
 		}
 	}
 	return ids
 }
 func (m Model) canOperate(a app.RemoteAction) bool {
-	if m.operator == nil || !m.ready || m.loading || m.busy || m.err != "" {
+	if m.width < 50 || m.height < 14 || m.operator == nil || !m.data.ProcessControlReady || !m.ready || m.loading || m.busy || m.err != "" {
 		return false
 	}
 	s := m.data.Status
@@ -121,6 +121,9 @@ func (m Model) actionPanel(w int) string {
 		}
 	}
 	out += panel(w, strings.Join(rows, "\n"))
+	if m.ready && !m.data.ProcessControlReady {
+		out += "\n\n" + panel(w, colorText("Controls locked", "#E3B341")+"\n"+label(safe(m.data.ProcessControlIssue)))
+	}
 	if m.actionNotice != "" {
 		out += "\n\n" + panel(w, safe(m.actionNotice))
 	}

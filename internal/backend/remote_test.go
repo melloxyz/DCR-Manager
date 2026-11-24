@@ -2,20 +2,18 @@ package backend
 
 import (
 	"dcr-manager/internal/app"
-	"strings"
 	"testing"
 )
 
 func TestActionArgs(t *testing.T) {
-	a, e := actionArgs(app.Stop, []int{42, 3})
-	if e != nil || strings.Join(a, " ") != "-Action stop -Expected 3,42" {
-		t.Fatalf("%v %v", a, e)
+	if e := validateAction(app.Stop, []app.ProcessIdentity{{PID: 42, Created: 1}}); e != nil {
+		t.Fatal(e)
 	}
 	for _, tc := range []struct {
 		a app.RemoteAction
-		p []int
-	}{{"other", nil}, {app.Start, []int{3}}, {app.Stop, nil}, {app.Restart, []int{0}}, {app.Stop, []int{4, 4}}} {
-		if _, e := actionArgs(tc.a, tc.p); e == nil {
+		p []app.ProcessIdentity
+	}{{"other", nil}, {app.Start, []app.ProcessIdentity{{PID: 3, Created: 1}}}, {app.Stop, nil}, {app.Restart, []app.ProcessIdentity{{PID: 0, Created: 1}}}, {app.Stop, []app.ProcessIdentity{{PID: 4, Created: 1}, {PID: 4, Created: 1}}}, {app.Stop, []app.ProcessIdentity{{PID: 3}}}} {
+		if e := validateAction(tc.a, tc.p); e == nil {
 			t.Fatalf("accepted invalid %v", tc)
 		}
 	}

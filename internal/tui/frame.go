@@ -30,7 +30,7 @@ func (m Model) View() tea.View {
 		status = "Last refresh failed"
 	}
 	head := paintRow(line(w, " "+bold("DCR Manager")+"  "+label(Version), label("Windows  /  Preview ")), w, "#171717")
-	sub := paintRow(line(w, " "+label(status), label("Read-only diagnostics ")), w, "#212121")
+	sub := paintRow(line(w, " "+label(status), label("Local diagnostics / controls ")), w, "#212121")
 	body := paintBlock(m.vp.View(), m.paneWidth(), bodyH, "#212121")
 	nav := []string{bold("  WORKSPACE"), label("  Community toolkit"), "", label("  NAVIGATION")}
 	for i, p := range pages {

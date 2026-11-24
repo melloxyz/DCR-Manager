@@ -29,4 +29,4 @@ Recovery: cache restore refuses overwrite and checks current npm cache path; par
 ## v1.3 development preview
 On feat/v1.3-tui, run Launch-TUI.cmd for the new Graphite Dark Go TUI. Build-TUI.cmd compiles it. The legacy manager remains available with Launch.cmd. See docs/TUI-MIGRATION.md for scope and limitations. The stable release remains v1.2.1.
 
-The development preview now exposes Remote lifecycle actions on Connection (S / X / T); stop and restart require confirmation. Read-only diagnostics and the transitional Windows action bridge are separate from the TUI. See docs/TUI-MIGRATION.md for verification limits and docs/SKILLS.md for project-scoped skills.
+The development preview now exposes Remote lifecycle actions on Connection (S / X / T); stop and restart require confirmation. Remote lifecycle now uses native Windows APIs in Go; read-only package and client diagnostics still use the PowerShell bridge. See docs/TUI-MIGRATION.md for verification limits and docs/SKILLS.md for project-scoped skills.

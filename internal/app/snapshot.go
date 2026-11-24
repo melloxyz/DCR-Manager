@@ -15,6 +15,7 @@ type Installation struct {
 }
 type Process struct {
 	PID, Parent    int
+	Created        uint64
 	Role, Location string
 }
 type Health struct {
@@ -35,13 +36,15 @@ type Backup struct {
 	Review  bool
 }
 type Snapshot struct {
-	Status        Status
-	Runtime       Runtime
-	Installations []Installation
-	Processes     []Process
-	Health        []Health
-	Clients       []Client
-	Logs          []Log
-	Backups       []Backup
+	ProcessControlReady bool
+	ProcessControlIssue string
+	Status              Status
+	Runtime             Runtime
+	Installations       []Installation
+	Processes           []Process
+	Health              []Health
+	Clients             []Client
+	Logs                []Log
+	Backups             []Backup
 }
 type Reader func(context.Context) (Snapshot, error)

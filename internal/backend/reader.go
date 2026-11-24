@@ -52,6 +52,7 @@ func Read(root string) app.Reader {
 		if s.Status.Version == "" {
 			return s, errors.New("diagnostic returned incomplete data")
 		}
+		attachNativeIdentities(&s)
 		return s, nil
 	}
 }
