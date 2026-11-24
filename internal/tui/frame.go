@@ -60,6 +60,13 @@ func (m Model) View() tea.View {
 	if w < 90 {
 		hint = " 1-9 Pages  Tab Focus  R Refresh  Q Quit"
 	}
+	if m.pending != "" {
+		hint = " Y Confirm   N/Esc Cancel"
+	} else if m.busy {
+		hint = " Remote operation in progress..."
+	} else if m.page == 1 && m.operator != nil {
+		hint = " S Start   X Stop   T Restart   R Refresh   Q Quit"
+	}
 	footer := paintRow(label(ansi.Truncate(hint, max(1, w-len(focus)-3), "…"))+"  "+label(focus), w, "#171717")
 	rows = append(rows, footer)
 	v := tea.NewView(strings.Join(rows, "\n"))

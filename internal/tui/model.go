@@ -28,6 +28,10 @@ var red = lg.Color("#E57373")
 
 type Model struct {
 	reader                app.Reader
+	operator              app.RemoteOperator
+	pending               app.RemoteAction
+	busy                  bool
+	actionNotice          string
 	data                  app.Snapshot
 	ready, loading, focus bool
 	err                   string
@@ -71,6 +75,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width, m.height = v.Width, v.Height
 		m.sync()
 		return m, nil
+	case actionResult:
+		m.busy = false
+		m.pending = ""
+		if v.err != nil {
+			m.actionNotice = "Operation failed: " + safe(v.err.Error())
+		} else {
+			m.actionNotice = "Local operation verified. Server connection not verified."
+		}
+		if m.reader != nil {
+			m.loading = true
+			m.sync()
+			return m, m.load()
+		}
+		m.sync()
+		return m, nil
 	case resultMsg:
 		m.loading = false
 		if v.err != nil {
@@ -84,12 +103,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.sync()
 		return m, nil
 	case tea.MouseClickMsg:
+		if m.busy || m.pending != "" {
+			return m, nil
+		}
 		mouse := v.Mouse()
 		if m.sidebarWidth() > 0 && mouse.Button == tea.MouseLeft && mouse.X >= 0 && mouse.X < m.sidebarWidth() && mouse.Y >= 6 && mouse.Y < min(6+len(pages), m.height-1) {
 			m.selectPage(mouse.Y - 6)
 			return m, nil
 		}
 	case tea.KeyPressMsg:
+		if next, cmd, handled := m.actionKey(v.String()); handled {
+			return next, cmd
+		}
 		switch v.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit

@@ -12,12 +12,15 @@ func legacyNotice(w int, task string) string {
 	return section("Maintenance") + panel(w, label(task)+"\n"+label("Available in Launch.cmd (legacy manager)."))
 }
 func (m Model) connectionContent(w int) string {
+	if m.pending != "" || m.busy {
+		return m.actionPanel(w)
+	}
 	s := m.data.Status
 	state, c := "Stopped", "#E3B341"
 	if s.RemoteProcesses > 0 {
 		state, c = "Running locally", "#66BB80"
 	}
-	return "\n" + panel(w, line(w-4, bold("Remote service"), colorText(state, c))+"\n"+line(w-4, label("Local sessions"), fmt.Sprint(s.RemoteRoots))+"\n"+line(w-4, label("Remote processes"), fmt.Sprint(s.RemoteProcesses))) + "\n\n" + panel(w, bold("Connectivity")+"\n"+label("Local activity does not confirm the server connection.")) + legacyNotice(w, "Start, stop and restart Remote.")
+	return "\n" + panel(w, line(w-4, bold("Remote service"), colorText(state, c))+"\n"+line(w-4, label("Local sessions"), fmt.Sprint(s.RemoteRoots))+"\n"+line(w-4, label("Remote processes"), fmt.Sprint(s.RemoteProcesses))) + "\n\n" + panel(w, bold("Connectivity")+"\n"+label("Local activity does not confirm the server connection.")) + m.actionPanel(w)
 }
 func (m Model) processesContent(w int) string {
 	if len(m.data.Processes) == 0 {
