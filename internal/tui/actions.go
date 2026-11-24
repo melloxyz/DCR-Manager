@@ -68,6 +68,9 @@ func (m Model) actionKey(k string) (Model, tea.Cmd, bool) {
 		}
 		return m, nil, true
 	}
+	if next, cmd, handled := m.maintenanceKey(k); handled {
+		return next, cmd, true
+	}
 	if m.page != 1 {
 		return m, nil, false
 	}

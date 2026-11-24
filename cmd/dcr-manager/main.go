@@ -46,7 +46,7 @@ func main() {
 		}
 		return
 	}
-	if _, err = tea.NewProgram(tui.New(read).WithOperator(backend.Operate(root))).Run(); err != nil {
+	if _, err = tea.NewProgram(tui.New(read).WithOperator(backend.Operate(root)).WithMaintainer(backend.Maintain(root))).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

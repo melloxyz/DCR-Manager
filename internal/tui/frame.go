@@ -60,12 +60,16 @@ func (m Model) View() tea.View {
 	if w < 90 {
 		hint = " 1-9 Pages  Tab Focus  R Refresh  Q Quit"
 	}
-	if m.pending != "" {
+	if m.pending != "" || m.maintenancePending.Action != "" {
 		hint = " Y Confirm   N/Esc Cancel"
 	} else if m.busy {
-		hint = " Remote operation in progress..."
+		hint = " Operation in progress..."
 	} else if m.page == 1 && m.operator != nil {
 		hint = " S Start   X Stop   T Restart   R Refresh   Q Quit"
+	} else if m.page == 2 && m.maintainer != nil {
+		hint = " P Repair/Install  U Update  R Refresh  Q Quit"
+	} else if m.page == 4 && m.maintainer != nil {
+		hint = " C Next cache  Z Quarantine  R Refresh  Q Quit"
 	}
 	footer := paintRow(label(ansi.Truncate(hint, max(1, w-len(focus)-3), "…"))+"  "+label(focus), w, "#171717")
 	rows = append(rows, footer)
@@ -78,6 +82,9 @@ func (m Model) View() tea.View {
 	return v
 }
 func (m Model) packagesContent(w int) string {
+	if m.maintenancePending.Action != "" || m.busy {
+		return m.maintenanceOverlay(w)
+	}
 	out := "\n" + bold("Detected installations") + "\n"
 	for _, p := range m.data.Installations {
 		status := stateText("Installed", p.EntryExists)
@@ -95,5 +102,5 @@ func (m Model) packagesContent(w int) string {
 	if len(m.data.Installations) == 0 {
 		out += "\n" + panel(w, label("No identified installations.")) + "\n"
 	}
-	return out + section("Maintenance") + panel(w, label("Repair and update are available in the legacy manager.")+"\n"+label("Launch.cmd  /  package operations"))
+	return m.maintenancePanel(w) + out
 }

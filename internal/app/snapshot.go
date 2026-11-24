@@ -46,5 +46,6 @@ type Snapshot struct {
 	Clients             []Client
 	Logs                []Log
 	Backups             []Backup
+	Caches              []CacheCandidate
 }
 type Reader func(context.Context) (Snapshot, error)

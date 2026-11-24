@@ -29,6 +29,10 @@ var red = lg.Color("#E57373")
 type Model struct {
 	reader                app.Reader
 	operator              app.RemoteOperator
+	maintainer            app.Maintainer
+	maintenancePending    app.MaintenanceRequest
+	maintenanceNotice     string
+	cacheSelection        int
 	pending               app.RemoteAction
 	busy                  bool
 	actionNotice          string
@@ -68,11 +72,34 @@ func (m *Model) sync() {
 	m.vp.SetHeight(max(1, m.height-3))
 	m.vp.SetContent(m.content(m.paneWidth()))
 }
-func (m *Model) selectPage(p int) { m.page = (p + len(pages)) % len(pages); m.vp.GotoTop(); m.sync() }
+func (m *Model) selectPage(p int) {
+	next := (p + len(pages)) % len(pages)
+	if next != m.page {
+		m.maintenanceNotice = ""
+	}
+	m.page = next
+	m.vp.GotoTop()
+	m.sync()
+}
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch v := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = v.Width, v.Height
+		m.sync()
+		return m, nil
+	case maintenanceDone:
+		m.busy = false
+		m.maintenancePending = app.MaintenanceRequest{}
+		if v.err != nil {
+			m.maintenanceNotice = "Maintenance failed: " + safe(v.err.Error())
+		} else {
+			m.maintenanceNotice = "Maintenance verified. Backups preserved."
+		}
+		if m.reader != nil {
+			m.loading = true
+			m.sync()
+			return m, m.load()
+		}
 		m.sync()
 		return m, nil
 	case actionResult:
@@ -96,6 +123,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.err = v.err.Error()
 		} else {
 			m.data = v.data
+			m.cacheSelection = 0
 			m.ready = true
 			m.updated = time.Now()
 			m.err = ""
@@ -103,7 +131,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.sync()
 		return m, nil
 	case tea.MouseClickMsg:
-		if m.busy || m.pending != "" {
+		if m.busy || m.pending != "" || m.maintenancePending.Action != "" {
 			return m, nil
 		}
 		mouse := v.Mouse()

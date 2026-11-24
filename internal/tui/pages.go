@@ -45,6 +45,9 @@ func (m Model) processesContent(w int) string {
 	return out
 }
 func (m Model) cacheContent(w int) string {
+	if m.maintenancePending.Action != "" || m.busy {
+		return m.maintenanceOverlay(w)
+	}
 	s := m.data.Status
 	state, c := "No candidates", "#66BB80"
 	if !s.CacheKnown {
@@ -58,7 +61,7 @@ func (m Model) cacheContent(w int) string {
 			out += "\n\n" + panel(w, line(w-4, bold("Legacy npm cache"), colorText("Legacy", "#E3B341"))+"\n"+bold(versionLabel(p.Version))+"\n"+label("Dedicated DCR cache candidate"))
 		}
 	}
-	return out + legacyNotice(w, "Inspect, quarantine or restore an eligible cache.")
+	return m.maintenancePanel(w) + out
 }
 func (m Model) recoveryContent(w int) string {
 	out := ""
