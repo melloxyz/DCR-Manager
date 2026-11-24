@@ -7,7 +7,7 @@ Goal: remove PowerShell/Python from the Go application's runtime path without we
 | V14-01A | Native bounded npm history and six JSON MCP locations | Implemented; local parity and regression |
 | V14-01B | Native TOML parsing, runtime/version and npm command discovery | Implemented; local parity and regression |
 | V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | Implemented; hosted parity passed |
-| V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | In progress (D.1 staging implemented) |
+| V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | In progress (D.1a/b isolated staging and switching implemented) |
 | V14-01E | Cross-backend parity, fault injection, legacy interoperability, clean-profile acceptance | Pending |
 
 Do not remove a bridge capability before its replacement has fixture coverage, comparison against the existing backend and fail-closed behavior. Preserve package ownership checks, path/reparse restrictions, PID and creation identities, stale-token guards, credentials and rollback journals. Native transaction tests must use isolated directories and must not stop the live Remote. Treat supported engine ranges and npm command discovery as explicit contracts. Evaluate a maintained TOML parser separately, including license and dependency review; no new dependency added in 01A.
@@ -85,7 +85,7 @@ Commit ee7567a passed both Go TUI (run 45432895358) and Windows tests (run 45432
 | Substage | Scope | State |
 | --- | --- | --- |
 | D.1a | Package preparation, pinned/latest selection and isolated artifact runner | Implemented; fixture and real pinned artifact validation |
-| D.1b | Native package switch and guarded activation with recoverable journal | Pending |
+| D.1b | Native package switch and guarded activation with recoverable journal | Implemented as an isolated primitive; production activation remains disabled |
 | D.2 | Cache quarantine with same-volume move and compatible sidecar | Pending |
 | D.3 | Package/cache backup restore | Pending |
 | D.4 | Shared mutex, fault injection, rollback/recovery hardening | Pending |
@@ -97,6 +97,20 @@ The artifact-only npm runner resolves a standard adjacent node.exe/npm.cmd/npm-c
 
 Fixture tests cover exact repair, fresh install/latest and explicit update selection, ownership, path overlap, cancellation, invalid/mismatched lockfile, version mismatch, guard refusal, stage failure and stale current version. Explicit local network acceptance ran against the actual npm package @wonderwhy-er/desktop-commander@0.3.4 and passed in 35.48 seconds; the fake installed entry remained unchanged. Run from the repository with the environment DCR_NATIVE_ARTIFACT_TEST=1 and go test ./internal/backend -run '^TestNativeArtifactAcceptance$' -count=1 -v. The fixture downloads only to a temporary tree and suppresses lifecycle scripts. The real Remote, credentials, production cache and actual installation were not modified.
 
-The native maintenance engine remains disabled for users; existing PowerShell transactions are unchanged. Next implement journaled no-overwrite package switching and fault-injected rollback in isolated fixtures.
+The native maintenance engine remains disabled for users; existing PowerShell transactions are unchanged. D.1b implements journaled no-overwrite package switching and fault-injected rollback in isolated fixtures. Next is D.2 cache quarantine; shared mutex and production integration remain D.4/D.5 gates.
 
 Hosted D.1a acceptance: ec72ee9 passed Go TUI (45434038675) and Windows tests (45434038446). See ../HANDOFF.md for the continuation plan and D.1b constraints.
+
+### D.1b: isolated native package switch
+
+`switchNativePackage` consumes a stage produced by `prepareNativePackage`, retaining the stage directory identity. It requires absolute, disjoint install/state roots on the same volume, a direct owned `stage-<32 hex>` child, an exact expected current version and a validated staged version. It scans the entire stage and tracked package trees for reparse points, symlinks and unsupported entries, with a 100,000-entry cap. It checks the process guard, cancellation and current trees again before mutation. Only `node_modules`, `package.json` and `package-lock.json` move. Credential directories, shims and unrelated installation files stay in place.
+
+The backup is a newly created random `package-backup-<32 hex>` directory. Windows `MoveFileExW` uses `MOVEFILE_WRITE_THROUGH` without replacement or cross-volume copy flags for package moves. Occupied destinations fail closed. File identities are loaded before moves, accounting for Go's lazy Windows `FileInfo` identity lookup. Post-verification checks the installed version and both complete tracked trees against their captured identities, sizes and modification times.
+
+The stage contains a legacy-compatible `transaction.json` with `schema: 1`, `state`, backup basename and target version. States are `switching`, `completed`, `switch-failed` and `rollback-incomplete`. Writes use a unique temporary file, `File.Sync`, close and a write-through same-volume rename; terminal updates replace only a matching switching journal. Existing initial journals are refused. Failed temporary writes, stages and backups remain as evidence; no automatic cleanup runs.
+
+Every successful move enters an in-memory reverse-order rollback log. Move errors, post-verification failures and failed completion-journal writes trigger independent rollback attempts. Rollback refuses occupied destinations and replaced source identities, attempts the remaining moves, then verifies original tracked trees. Rollback and journal failures are reported separately. Cancellation before the first move prevents mutation; cancellation after switching starts does not interrupt the switch or rollback.
+
+Fixture regressions cover initial install, repair/update, exact credential and unrelated-file preservation, all six move failure boundaries, rollback failure, occupied/replaced targets, stale inputs before and after the initial journal, stage identity/version mismatch, nested links, existing journals, journal failures, canceled preflight, cancellation during switching and a real Windows sharing violation. Native/legacy recovery status, version, size and restore-token parity are checked for completed, failed and incomplete rollback transactions. This exposed and fixed a native inventory mismatch: package artifacts without an ownership manifest are unsafe, matching PowerShell.
+
+Crash limitations: a crash can leave an empty backup before the initial journal, a temporary journal file, `switching` between moves, or installed files with a switching journal before completion. `File.Sync` and write-through moves do not prove whole-directory durability under power loss. Rollback logs are in memory; automatic crash replay is not implemented. Directory/path races, shared mutex enforcement, all-process checks inside that mutex, process termination/power-loss testing and production npm lifecycle acceptance remain D.4/D.5 or disposable-machine work. Tree metadata checks are not cryptographic full-tree authenticity. No live maintenance path calls this primitive.

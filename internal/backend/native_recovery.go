@@ -186,6 +186,10 @@ func inspectRecovery(ctx context.Context, state, cache, name string, now time.Ti
 	}
 	top, e := readPlainFile(filepath.Join(path, "package.json"), maxConfigBytes)
 	if os.IsNotExist(e) {
+		// A partial package without its ownership manifest is unsafe in the legacy inventory.
+		if stageOwnership(path) != nil {
+			return r
+		}
 		r.Status = "incomplete"
 		return r
 	}

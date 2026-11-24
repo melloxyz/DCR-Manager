@@ -39,7 +39,7 @@ The v1.3.0 source milestone is approved. Remaining independent real-world accept
 
 ## v1.4.0: Distribution
 
-- V14-01 (in progress): Native backend migration. Read-only npm logs, seven MCP JSON/TOML locations and runtime version probes migrated; installation/cache discovery and inventory migrated with legacy cache-token parity checks; recovery inventory migrated with legacy restore-token checks; process inventory and health migrated with independent legacy reconciliation; hosted token parity passed; native package staging is implemented internally, while transaction switching, rollback and integration remain. See [migration plan](V14-MIGRATION.md).
+- V14-01 (in progress): Native backend migration. Read-only npm logs, seven MCP JSON/TOML locations and runtime version probes migrated; installation/cache discovery and inventory migrated with legacy cache-token parity checks; recovery inventory migrated with legacy restore-token checks; process inventory and health migrated with independent legacy reconciliation; hosted token parity passed. Native package staging, transaction switching and initial rollback are implemented internally with isolated fixtures. Cache quarantine/restore, shared mutex hardening and production integration remain. See [migration plan](V14-MIGRATION.md).
 - V14-02: Portable Windows AMD64 executable or self-contained bundle; explicit external prerequisites.
 - V14-03: Reproducible build/release pipeline, license/notice packaging, checksums and provenance.
 - V14-04: Public documentation, installation/uninstallation, version support and contributor workflow.

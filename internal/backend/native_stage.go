@@ -13,7 +13,10 @@ import (
 	"time"
 )
 
-type packageStage struct{ Stage, Version string }
+type packageStage struct {
+	Stage, Version string
+	identity       os.FileInfo
+}
 type stageGuard func(context.Context, string) error
 type stageRunner func(context.Context, string, string) error
 
@@ -202,7 +205,7 @@ func prepareNativePackage(ctx context.Context, root, state string, action app.Ma
 	if stageVersion(root) != expected {
 		return zero, maintenanceError("STALE")
 	}
-	return packageStage{Stage: stage, Version: v}, nil
+	return packageStage{Stage: stage, Version: v, identity: identity}, nil
 }
 
 // This runner intentionally suppresses npm lifecycle scripts. It is for
