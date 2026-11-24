@@ -17,6 +17,7 @@ This inventory covers Go modules used by the Windows executable at the time of t
 | github.com/lucasb-eyer/go-colorful | v1.4.1 | [Notices](third_party/licenses/github.com_lucasb-eyer_go-colorful/) |
 | github.com/mattn/go-runewidth | v0.0.31 | [Notices](third_party/licenses/github.com_mattn_go-runewidth/) |
 | github.com/muesli/cancelreader | v0.2.2 | [Notices](third_party/licenses/github.com_muesli_cancelreader/) |
+| github.com/pelletier/go-toml/v2 | v2.4.3 | [Notices](third_party/licenses/github.com_pelletier_go-toml_v2/) |
 | github.com/rivo/uniseg | v0.4.8-0.20261110175422-3a370411ca06 | [Notices](third_party/licenses/github.com_rivo_uniseg/) |
 | github.com/xo/terminfo | v1.0.0 | [Notices](third_party/licenses/github.com_xo_terminfo/) |
 | golang.org/x/sync | v0.22.0 | [Notices](third_party/licenses/golang.org_x_sync/) |

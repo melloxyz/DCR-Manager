@@ -5,7 +5,7 @@ Goal: remove PowerShell/Python from the Go application's runtime path without we
 | Stage | Scope | State |
 | --- | --- | --- |
 | V14-01A | Native bounded npm history and six JSON MCP locations | Implemented; local parity and regression |
-| V14-01B | Native TOML parsing, runtime/version and npm command discovery | Pending |
+| V14-01B | Native TOML parsing, runtime/version and npm command discovery | Implemented; local parity and regression |
 | V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | Pending |
 | V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | Pending |
 | V14-01E | Cross-backend parity, fault injection, legacy interoperability, clean-profile acceptance | Pending |
@@ -22,3 +22,14 @@ The PowerShell bridge defaults to legacy behavior; its NativeDiagnostics switch 
 Validation: TDD tests for privacy, malformed and oversized inputs, cancelled/unknown scans, recent-entry cap and missing environment roots. Symlink rejection fixture requires Windows symlink privileges and may be skipped; actual junction/clean-machine testing remains pending. A live read-only comparison returned identical counts/status for all seven client rows and identical empty retained npm history; this is one environment, not universal equivalence. The active Remote process inventory was independently verified. No production package, cache, credentials or startup entry were modified.
 
 The feature branch uses Go application version 1.4.0-dev; VERSION and main retain stable product source milestone 1.3.1. Build the development binary separately; do not distribute it as a stable release. V14-02 packaging and V14-05 clean-machine acceptance follow native parity.
+
+
+## V14-01B
+
+The Go application now audits all seven known MCP locations, including Codex TOML. It uses the pinned MIT-licensed github.com/pelletier/go-toml/v2 v2.4.3 parser, with no additional required modules. This is a deliberate dependency instead of an incomplete hand-written TOML parser. Preserve its license when packaging. The same bounded read, ancestor and file identity checks apply. Only root mcp_servers is evaluated; plugin/project configurations, indirect launchers and all possible version ranges are not inferred. Invalid, oversized or unreadable files remain explicitly unassessed. No configuration content, server names or environment values are returned.
+
+Node and npm version probes resolve fixed executable names through PATH, reject relative/current-directory resolution, limit stdout to 4 KiB and use five-second per-probe deadlines plus bounded pipe waiting. Only syntactically valid version tokens are returned. Missing commands and failed/unsupported probes are distinct; failed probes disable the corresponding availability flag. Windows npm.cmd is invoked via the system cmd.exe using a fixed --version argument, disabled AutoRun/delayed expansion, explicit quoting and rejection of shell metacharacters in launcher paths. The installed runtime and PATH must still be trusted. Timeout handling is not a process-tree sandbox. Compatibility assessment supports only exact numeric Node versions and simple >= minimum ranges; compound/prerelease ranges remain unknown.
+
+Bridge schema 2 (NativeRuntime) skips the legacy runtime/version and all client audit calls. Existing default and schema 1 modes remain compatible. The Go application no longer requires audit_toml.py in its bundle or invokes Python for auditing. Legacy PowerShell custom audit remains optional Python-backed. Installation inventory still supplies the declared Node engine range, and PowerShell still obtains npm cache/global paths and performs its inventory/maintenance; those calls move in later stages. The new development binary is not yet standalone.
+
+Local read-only parity: Node v24.15.0, npm 11.12.1, declared >=22.12.0 and meets-minimum matched the legacy snapshot; all seven MCP rows matched status/reference/floating counts. No live process was stopped. Windows fixtures verify fixed npm argument quoting with spaces/parentheses and rejection of unsafe launcher names. Clean-profile acceptance, alternative npm launchers and complex Node engine ranges remain outside this verified scope.

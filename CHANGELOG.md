@@ -3,7 +3,9 @@
 ## Unreleased (1.4.0-dev)
 - Migrate bounded npm log scanning and known JSON MCP configuration audit to native Go.
 - Preserve the default legacy PowerShell diagnostics and use a versioned internal bridge envelope for remaining fields.
-- Document incremental native backend migration and parity gates; no new runtime modules.
+- Document incremental native backend migration and parity gates.
+- Migrate Codex TOML audit to go-toml/v2 and native Node/npm version probes; preserve legacy bridge compatibility.
+- Add the pinned TOML parser license and explicit unsupported-range handling.
 
 ## 1.3.1
 - Update checkout and setup-go to v7 (#1, #2).

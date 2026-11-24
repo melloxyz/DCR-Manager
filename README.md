@@ -24,7 +24,7 @@ DCR Manager is not an official Desktop Commander product and is not affiliated w
 
 - Windows AMD64, Windows PowerShell 5.1, a terminal with Unicode and truecolor support (Windows Terminal recommended; 110x35 or larger).
 - Node.js and npm for Desktop Commander installation and lifecycle operations. The upstream package determines its supported Node.js versions.
-- Optional Python 3.11+ with the Windows py launcher for TOML configuration audit.
+- Python 3.11+ with the Windows py launcher is optional for the legacy PowerShell TOML audit only; the v1.4 development Go application parses TOML natively.
 - Go, Git and PowerShell 7 for development and full regression testing. Use the Go version declared in go.mod.
 
 No administrator privileges are requested. The preview is a **multi-file bundle**, not a standalone executable.
