@@ -11,3 +11,7 @@ import (
 func npmVersionCommand(context.Context, string) (*exec.Cmd, error) {
 	return nil, errors.New("Windows required")
 }
+
+func npmDirectoryCommand(context.Context, string, string) (*exec.Cmd, error) {
+	return nil, errors.New("Windows required")
+}

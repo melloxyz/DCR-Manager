@@ -53,7 +53,7 @@ func Read(root string) app.Reader {
 		}
 		ctx, cancel := context.WithTimeout(parent, 45*time.Second)
 		defer cancel()
-		cmd := exec.CommandContext(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", filepath.Join(root, "src", "Bridge.ps1"), "-NativeRuntime")
+		cmd := exec.CommandContext(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", filepath.Join(root, "src", "Bridge.ps1"), "-NativeInventory")
 		configure(cmd)
 		out, err := cmd.Output()
 		if ctx.Err() != nil {
@@ -72,13 +72,34 @@ func Read(root string) app.Reader {
 			return s, errors.New("diagnostic returned invalid JSON")
 		}
 		s = wire.Snapshot
-		if wire.NativeDiagnosticsSchema != 2 {
+		if wire.NativeDiagnosticsSchema != 3 {
 			return app.Snapshot{}, errors.New("diagnostic bridge version mismatch")
 		}
 		if s.Status.Version == "" {
 			return s, errors.New("diagnostic returned incomplete data")
 		}
-		s.Logs, s.LogsKnown = nativeLogs(ctx, wire.InternalCacheRoot)
+		cache, cacheErr := npmDirectory(ctx, "cache")
+		global, _ := npmDirectory(ctx, "global")
+		inventory := scanInstallations(ctx, os.Getenv("LOCALAPPDATA"), global, cache)
+		// Until mutations migrate, require exact agreement with their legacy cache identities.
+		sameCache := cacheErr == nil && filepath.IsAbs(wire.InternalCacheRoot) && strings.EqualFold(filepath.Clean(wire.InternalCacheRoot), cache)
+		applyCacheParity(&s, inventory, sameCache)
+		if !sameCache {
+			// Cache restores depend on the same npm root; do not authorize them on disagreement.
+			for i := range s.Backups {
+				if s.Backups[i].Kind == "cache" {
+					s.Backups[i].Status = "destination-blocked"
+					s.Backups[i].Token = ""
+				}
+			}
+		}
+		if inventory.version != s.Status.Version || inventory.installed != s.Status.Installed {
+			return app.Snapshot{}, errors.New("dedicated installation inventories disagree; refresh or use legacy diagnostics")
+		}
+		s.Status.Version = inventory.version
+		s.Status.Installed = inventory.installed
+		s.Installations = inventory.installations
+		s.Logs, s.LogsKnown = nativeLogs(ctx, cache)
 		s.Clients = nativeClientAudits(os.Getenv("USERPROFILE"), os.Getenv("APPDATA"))
 		applyRuntime(ctx, &s, runRuntimeVersion)
 		if ctx.Err() != nil {

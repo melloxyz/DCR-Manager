@@ -1,4 +1,5 @@
-param([switch]$NativeDiagnostics,[switch]$NativeRuntime)
+param([switch]$NativeDiagnostics,[switch]$NativeRuntime,[switch]$NativeInventory)
+if($NativeInventory){$NativeRuntime=$true}
 if($NativeRuntime){$NativeDiagnostics=$true}
 $ErrorActionPreference='Stop'
 $WarningPreference='SilentlyContinue'
@@ -20,12 +21,12 @@ $result=[ordered]@{
     caches=$caches
     status=Get-DcrStatus
     runtime=$(if(!$NativeRuntime){Get-DcrRuntime})
-    installations=@(Get-DcrInstallInventory)
+    installations=@(if(!$NativeInventory){Get-DcrInstallInventory})
     processes=@(Get-DcrInventory)
     health=@(Get-DcrProcessHealth)
     clients=@(if(!$NativeRuntime){Get-DcrClientAudit -IncludeMissing -OnlyToml:$NativeDiagnostics})
     logs=@($logScan.logs)
     backups=$backups
 }
-if($NativeDiagnostics){$result.nativeDiagnosticsSchema=$(if($NativeRuntime){2}else{1});$result.internalCacheRoot=$cacheRoot}
+if($NativeDiagnostics){$result.nativeDiagnosticsSchema=$(if($NativeInventory){3}elseif($NativeRuntime){2}else{1});$result.internalCacheRoot=$cacheRoot}
 [pscustomobject]$result | ConvertTo-Json -Depth 8 -Compress

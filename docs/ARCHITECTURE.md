@@ -24,3 +24,5 @@ Go/Charm was adopted in v1.3 ahead of the original v1.4 evaluation. The preview 
 The v1.4 development reader consumes a versioned internal bridge envelope for the remaining PowerShell fields. Go reads bounded npm log history and the six known JSON MCP files directly. The cache location is internal to the bridge exchange and is not serialized in public snapshots. Legacy invocation without the new switch retains v1.3 behavior.
 
 Bridge schema 2 delegates all known client audits (including TOML) and Node/npm version probes to Go. Native Windows command discovery uses fixed runtime names and a constrained npm.cmd version invocation; cache/global path queries and remaining inventory are still in PowerShell. The old bridge invocation remains available for the stable legacy manager.
+
+Bridge schema 3 delegates npm directory discovery and installation/cache inventory to Go. Native cache candidates must match legacy root, count and tokens before mutations are available. Recovery and process health still rely on the legacy bridge; the next migration steps retain independent guard parity.

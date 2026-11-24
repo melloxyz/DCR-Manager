@@ -6,7 +6,7 @@ Goal: remove PowerShell/Python from the Go application's runtime path without we
 | --- | --- | --- |
 | V14-01A | Native bounded npm history and six JSON MCP locations | Implemented; local parity and regression |
 | V14-01B | Native TOML parsing, runtime/version and npm command discovery | Implemented; local parity and regression |
-| V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | Pending |
+| V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | In progress (C.1 implemented) |
 | V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | Pending |
 | V14-01E | Cross-backend parity, fault injection, legacy interoperability, clean-profile acceptance | Pending |
 
@@ -33,3 +33,18 @@ Node and npm version probes resolve fixed executable names through PATH, reject 
 Bridge schema 2 (NativeRuntime) skips the legacy runtime/version and all client audit calls. Existing default and schema 1 modes remain compatible. The Go application no longer requires audit_toml.py in its bundle or invokes Python for auditing. Legacy PowerShell custom audit remains optional Python-backed. Installation inventory still supplies the declared Node engine range, and PowerShell still obtains npm cache/global paths and performs its inventory/maintenance; those calls move in later stages. The new development binary is not yet standalone.
 
 Local read-only parity: Node v24.15.0, npm 11.12.1, declared >=22.12.0 and meets-minimum matched the legacy snapshot; all seven MCP rows matched status/reference/floating counts. No live process was stopped. Windows fixtures verify fixed npm argument quoting with spaces/parentheses and rejection of unsafe launcher names. Clean-profile acceptance, alternative npm launchers and complex Node engine ranges remain outside this verified scope.
+
+
+## V14-01C incremental inventory migration
+
+| Substage | Scope | State |
+| --- | --- | --- |
+| V14-01C.1 | Native npm directory discovery, installation and cache inventory | Implemented; local parity and regression |
+| V14-01C.2 | Native recovery inventory, transaction journals and restore-token parity | Pending |
+| V14-01C.3 | Native process health and independent mutation-guard parity | Pending |
+
+C.1 obtains npm cache and global node_modules paths through fixed read-only npm commands. The command runner retains the caller working directory to match existing maintenance behavior, uses the system cmd.exe and fixed arguments, bounded output and deadlines. Discovery requires absolute valid paths. Go inspects dedicated/global installations and exclusive npx cache directories using bounded manifest reads, path/identity checks and fixed output classifications. The inventory is not an exhaustive scan of all possible Node/npm installations. The cache scan has a cooperative five-second deadline and a 10,000-directory-entry cap. Extra dependency/workspace declarations are conservatively rejected. Unknown/unsupported layouts may differ from the permissive historical inventory. A dedicated status mismatch rejects the snapshot rather than displaying unsafe confirmation data.
+
+Cache tokens reproduce the legacy SHA-256 contract: lowercased path, Windows creation time converted to .NET ticks, uppercase SHA-256 of the raw top-level manifest and package version. Tokens are identity checks, not cryptographic authenticity or full-tree integrity. Until the mutation engine is migrated, native cache rows become actionable only if the legacy cache root, candidate count and exact tokens agree. Disagreement marks cache unknown and removes actionable candidates. Cache restore is blocked when roots disagree. Existing PowerShell cache status/validation and recovery/process inspection therefore remain in the bridge; native installation rows replace the old installation scan. Schema 3 NativeInventory is added without changing default, schema 1 or schema 2 behavior.
+
+Tests cover exclusive versus mixed cache fixtures, dedicated/global/cache inventories, changed manifest tokens, missing/unknown and cancelled scans, fail-closed parity and exact token equality against the legacy PowerShell implementation in an isolated Windows fixture. Local read-only comparison found one dedicated and one legacy npx installation, one eligible cache with the same token, and three active Remote processes. Native and legacy installation rows agreed. No active installation, cache, backup or process was modified. The new native implementation still uses PowerShell for remaining inventory/guard checks and all mutations. Clean-machine and reparse/junction acceptance remain pending.
