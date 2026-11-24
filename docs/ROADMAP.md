@@ -1,60 +1,53 @@
-# Roadmap oficial
+# Roadmap
 
-Escopo de produto fornecido pelo mantenedor em 2026-11-24. As etapas T1-T10 são entregas internas da v1.3.0, não substituem as versões de produto. O primeiro snapshot Git real é v1.2.1; não existem tags históricas inventadas.
+This is the public product roadmap. Implemented means code exists and has fixture/local validation; it does not imply full real-world acceptance. Dates are not promised. The first actual Git baseline is v1.2.1; earlier milestones are historical development, not reconstructed tags.
 
-## v1.1.0 - Fundação estrutural
-- Arquitetura modular: implementada.
-- Instalação permanente: implementada.
-- Gerenciamento de processos: implementado.
-- Diagnóstico e reparo seletivo: implementado.
-- Testes automatizados: implementados.
-- Configuração de CI/CD: CI configurada; execução hospedada e CD ainda pendentes.
+| Milestone | Focus | Status |
+| --- | --- | --- |
+| v1.1.0 | Structural foundation | Historical |
+| v1.2.x | Advanced management and reliability | Stable legacy baseline v1.2.1 |
+| v1.3.0 | User experience and TUI | Release candidate; acceptance ongoing |
+| v1.4.0 | Distribution and portability | Planned |
+| v2.0.0 | Complete management toolkit | Exploratory |
 
-## v1.2.0 - Gerenciamento avançado
-- Detectar instalações globais e locais: implementado.
-- Auditar configurações MCP dos agentes: implementado em locais conhecidos, leitura apenas; TOML opcional.
-- Identificar processos órfãos: avaliação de pais ausentes/reutilizados, não prova de processo órfão.
-- Rollback automatizado: implementado com tentativa de recuperação e relato de falhas.
-- Gerenciar backups e retenção: inventário, restauração e revisão de idade; sem exclusão automática.
-- Verificar compatibilidade Node.js/npm: versões e requisitos mínimos simples; faixas complexas pendentes.
+## v1.1.0: Structural foundation
 
-## v1.3.0 - Experiência de uso
-- Interface com navegação por teclado: implementada em Go/Charm v2, Graphite Dark.
-- Inglês: idioma único na v1.3.0, por decisão do mantenedor. Internacionalização adiada para avaliação futura.
-- Painel de saúde do sistema: implementado, diagnósticos locais.
-- Assistente de resolução de problemas: implementado; regras locais e recomendações sem execução automática.
-- Instalação inicial guiada: implementada; pré-requisitos, navegação para instalação confirmada e conexão, com opção de concluir ou pular.
-- Gerenciamento de inicialização com Windows: implementado; registro por usuário, opt-in e reversível; validação em login real pendente.
+Modular architecture, permanent installation, process management, selective diagnosis/repair, automated tests and Windows CI configuration. Hosted CI execution and CD are not claimed.
 
-### Plano interno atualizado
-| Etapa | Entrega | Estado |
-|---|---|---|
-| T1 | Fundação Go e arquitetura | Implementada |
-| T2 | Design system Graphite Dark | Implementada |
-| T3 | Shell e navegação | Implementada |
-| T4 | Dashboard com dados reais | Implementada |
-| T5 | Controle nativo de processos Windows | Implementada; reconexão real pendente |
-| T6 | Pacotes e cache | Implementada; npm real isolado pendente |
-| T7 | Backups, recuperação, inventário de estágios e retenção | Implementada; restauração real isolada pendente |
-| T8 | Auditoria MCP, logs e assistente de resolução de problemas | Implementada; validação de UX pendente |
-| T9 | Configurações persistentes, onboarding em inglês e inicialização com Windows (opt-in e reversível) | Implementada; aceitação visual e login real pendentes |
-| T10 | Estabilização, regressões e empacotamento local | RC1 preparada; aceite interativo e validação real pendentes |
+## v1.2.0: Advanced management
 
-## v1.4.0 - Distribuição
-- Avaliar migração para Go: antecipada e aprovada na v1.3.0; concluir avaliação de dependências remanescentes e portabilidade.
-- Executável portátil: pendente; preview ainda requer scripts adjacentes.
-- Releases automatizadas: pendente.
-- Licença open-source: pendente de decisão do mantenedor.
-- Documentação pública: pendente.
-- Testes em máquinas Windows limpas: pendente.
+Global/local installation inventory, read-only MCP audits, advisory parent-process assessment (not proof of orphaning), rollback attempts, backup/retention review and basic Node/npm compatibility. Complex engine ranges and automated retention deletion are outside the validated scope.
 
-Antes de publicar: testar o pacote real, autenticação/reconexão, backup/restore, instalações limpas, CI hospedada, segurança, licença, marca upstream e artefatos verificáveis. Não publicar dados locais. v1.3.0 estável não implica release pública da v1.4.0.
+## v1.3.0: User experience
 
-## v2.0.0 - Gerenciador completo
-- Gerenciar integrações com agentes.
-- Migrar instalações antigas.
-- Diagnóstico avançado de conectividade.
-- Gerenciar sessões e logs.
-- Avaliar suporte Linux e macOS.
+Keyboard/mouse TUI, Graphite Dark, local system health, advisory troubleshooting, guided first-run setup and opt-in Windows startup. English only by maintainer decision; other languages may be evaluated later. Go migration was brought forward from v1.4.
 
-Todos os itens v2.0.0 permanecem pendentes; inventários e diagnósticos básicos existentes não equivalem a esses recursos completos.
+| Stage | Deliverable | Status |
+| --- | --- | --- |
+| T1-T4 | Go foundation, design, navigation, health | Implemented |
+| T5 | Native Windows lifecycle | Implemented; real upstream reconnect pending |
+| T6 | Package/cache maintenance | Implemented; full upstream acceptance pending |
+| T7 | Recovery and retention review | Implemented; full upstream acceptance pending |
+| T8 | Diagnostics and troubleshooting | Implemented |
+| T9 | Settings, English onboarding, startup | Implemented; actual Windows sign-in pending |
+| T10 | Stabilization and local candidate | RC1 tagged |
+| T10.1 | Acceptance and public-source preparation | Local artifact tests and source preparation done; manual acceptance/license/privacy pending |
+| T10.2 | Fix acceptance findings, candidate rebuild | Pending |
+| T10.3 | Stable v1.3.0 promotion | Pending acceptance |
+
+Source publication can happen separately from stable release once licensing, Git privacy and source checks are resolved. Do not label the RC as stable.
+
+## v1.4.0: Distribution
+
+- V14-01: Assess remaining PowerShell/Python dependencies and native parity; retain safe fallback until tested.
+- V14-02: Portable Windows AMD64 executable or self-contained bundle; explicit external prerequisites.
+- V14-03: Reproducible build/release pipeline, license/notice packaging, checksums and provenance.
+- V14-04: Public documentation, installation/uninstallation, version support and contributor workflow.
+- V14-05: Clean Windows VM acceptance, real lifecycle, package/cache/restore and sign-in regression.
+- V14-06: Public prerelease and stable release after acceptance; review code signing and distribution channels.
+
+Open-source licensing is now an earlier source-publication prerequisite, rather than postponed until distribution. No date or additional platform support is promised.
+
+## v2.0.0: Complete management toolkit
+
+Manage agent integrations, migrate legacy installs, advanced connectivity diagnostics, session/log management and evaluate Linux/macOS support. These remain exploratory; existing read-only inventory does not imply full integration management.

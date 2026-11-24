@@ -1,5 +1,7 @@
-﻿name: Windows tests
+name: Windows tests
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   tests:
     runs-on: windows-latest

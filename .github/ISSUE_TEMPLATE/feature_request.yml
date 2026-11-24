@@ -1,0 +1,20 @@
+name: Feature request
+description: Propose an improvement to DCR Manager
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and alternatives
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Compatibility or safety implications

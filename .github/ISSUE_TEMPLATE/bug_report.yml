@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible DCR Manager problem
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, raw logs, personal paths or Remote device IDs. Report vulnerabilities privately (see SECURITY.md).
+  - type: input
+    id: version
+    attributes:
+      label: DCR Manager version
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows version, terminal and Node/npm versions (no machine identifiers)
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps, expected behavior and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence

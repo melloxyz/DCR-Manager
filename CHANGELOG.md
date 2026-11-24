@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+- Require patched Go 1.26.11; add govulncheck to CI.
+- Prepare English public documentation, contribution/security policies, issue templates and dependency notices.
+- Add optional real npm artifact acceptance test with isolated state and lifecycle scripts disabled.
+- Separate source publication gates from stable binary release.
+
 ## 1.3.0-rc.1
 - Go/Charm v2 Graphite Dark TUI with keyboard/mouse navigation and local health dashboard.
 - Native Windows lifecycle controls with PID/creation identity and retained process handles.

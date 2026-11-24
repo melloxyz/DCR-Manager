@@ -1,42 +1,79 @@
-# DCR Manager v1.2.1
+# DCR Manager
 
-Independent community utility for Desktop Commander Remote on Windows. Not affiliated with the upstream project.
+An independent, Windows-first terminal utility for managing Desktop Commander Remote (DCR). Built with Go and Charm v2, with a Graphite Dark interface and a tested PowerShell maintenance backend.
 
-## Quick start
+**Development status:** v1.3.0-rc.1 is a local release candidate, not a production-ready release. The legacy v1.2.1 is the current stable baseline. This repository is being prepared for open-source publication; licensing and publication gates are tracked in [the release checklist](docs/RELEASE-CHECKLIST.md) and [licensing notes](docs/LICENSING.md).
 
-Requires Windows PowerShell 5.1 (included with Windows). Node.js and npm are required to install/run Desktop Commander itself, not to open the manager. Double-click Launch.cmd. Use option 5 for a missing installation, then option 1. Follow upstream authentication instructions in the Remote terminal if needed.
+DCR Manager is not an official Desktop Commander product and is not affiliated with its maintainers. See the [upstream project](https://github.com/wonderwhy-er/DesktopCommanderMCP) for the actual Remote service and authentication.
 
-CLI: `Launch.cmd -Mode status` outputs JSON; `Launch.cmd -Mode doctor` gives a read-only diagnostic. Run `Test.cmd` for local automated tests.
+## What it does
 
-## Safety
+| Module | Capabilities |
+| --- | --- |
+| Overview | Local health, runtime, installation and process inventory |
+| Connection | Start, stop and restart recognized Remote processes |
+| Packages | Dedicated npm installation, staged repair and explicit update |
+| Processes | Inspect recognized DCR process identities and parent relationships |
+| Cache | Selective quarantine of exclusive DCR npm cache directories |
+| Recovery | Validated backup restore, transaction review and advisory retention |
+| MCP Clients | Read-only audit of known user configuration locations |
+| Logs | Bounded, sanitized npm history and troubleshooting guidance |
+| Settings | First-run guidance, landing page and opt-in Windows startup |
 
-Dedicated installation: %LOCALAPPDATA%\DesktopCommander. Backups/reports: %LOCALAPPDATA%\DCRManager-state. Only recognized DCR cache directories with an exclusive package dependency are eligible for quarantine. No global cache wipe, no blanket Node termination. Repair stages packages and preserves the Remote directory; package switching requires all recognized DCR processes to be closed. Exported reports omit command lines, machine names, account identifiers, tokens and raw log content. Review reports before sharing; PIDs and log timestamps remain. Local process status does not establish server connectivity. The launcher uses execution policy Bypass for that process only.
+## Requirements
 
-## Scope
+- Windows AMD64, Windows PowerShell 5.1, a terminal with Unicode and truecolor support (Windows Terminal recommended; 110x35 or larger).
+- Node.js and npm for Desktop Commander installation and lifecycle operations. The upstream package determines its supported Node.js versions.
+- Optional Python 3.11+ with the Windows py launcher for TOML configuration audit.
+- Go, Git and PowerShell 7 for development and full regression testing. Use the Go version declared in go.mod.
 
-Windows-first. No telemetry, persistent manager service, or cloud credentials. Current version manages the dedicated npm install and discovers DCR Node processes and exclusive npx caches. Read-only inventory covers the dedicated install, current npm global root and exclusive npx caches. Client audit checks known user-level JSON locations; TOML audit supports Codex mcp_servers using optional Python 3.11+ (py launcher). Custom JSON/TOML files can be explicitly audited; project configs are not automatically scanned. No client configuration is rewritten. Node compatibility checks only simple minimum engine ranges. No automatic update. Package backups can be restored through menu B with DCR clients stopped; manual recovery is described in docs/RECOVERY.md.
+No administrator privileges are requested. The preview is a **multi-file bundle**, not a standalone executable.
 
-## Development
+## Run from source
 
-Core.psm1: testable policy and filesystem operations. Operations.psm1: Windows/npm integration. Manager.ps1: presentation. Tests use isolated temporary fixtures. CI configuration targets Windows PowerShell and PowerShell 7; hosted CI is not yet run.
+From the repository directory on Windows:
 
-See docs/ROADMAP.md. License not selected; obtain permission before redistribution. Upstream: https://github.com/wonderwhy-er/DesktopCommanderMCP
+```powershell
+.\Build-TUI.cmd
+.\Launch-TUI.cmd
+```
 
-CLI additions: Launch.cmd -Mode inventory / clients / runtime. Maintenance.psm1 contains inventory and recovery logic.
+Keep the executable and its adjacent src directory together. First-run setup guides users through prerequisites, confirmed installation and explicit Remote startup. No automatic installation, authentication or startup registration occurs.
 
-Recovery: cache restore refuses overwrite and checks current npm cache path; parent-process diagnosis is advisory; backup retention review flags age >=30 days without deletion. Use Launch.cmd -Mode health / backups, or -Mode config -ConfigPath "path". See docs/RECOVERY.md.
+For read-only diagnostics:
 
-## v1.3 development preview
-On feat/v1.3-tui, run Launch-TUI.cmd for the new Graphite Dark Go TUI. Build-TUI.cmd compiles it. The legacy manager remains available with Launch.cmd. See docs/TUI-MIGRATION.md for scope and limitations. The stable release remains v1.2.1.
+```powershell
+.\bin\dcr-manager.exe --version
+.\bin\dcr-manager.exe --snapshot
+.\bin\dcr-manager.exe --settings
+```
 
-The development preview now exposes Remote lifecycle actions on Connection (S / X / T); stop and restart require confirmation. Remote lifecycle now uses native Windows APIs in Go; read-only package and client diagnostics still use the PowerShell bridge. See docs/TUI-MIGRATION.md for verification limits and docs/SKILLS.md for project-scoped skills.
+Review diagnostic output before sharing it. Local process IDs and timestamps may be present. The legacy PowerShell manager remains accessible through Launch.cmd.
 
-T6 preview: Packages (P repair/install, U update), Cache (C select next, Z quarantine), Y confirm and N/Esc cancel. Package operations stage with a separate npm cache and retain backups; cache quarantine moves only verified DCR candidates. Stop DCR/MCP clients before replacing package files. See docs/TUI-MIGRATION.md for scope, tests and limitations.
+## Navigation
 
-T7 preview: Recovery (B next item, V restore; Y confirm, N/Esc cancel). Shows validated package/cache backups, transaction stages, logical file size and advisory retention review. No automatic deletion. See docs/RECOVERY.md and docs/ROADMAP.md for the official product scope.
+- 1-9: select a module; arrows navigate; Tab changes focus.
+- Page Up/Down: scroll; R refreshes; H opens troubleshooting; Q exits.
+- Follow the module-specific key hints. Y confirms sensitive operations; N or Esc cancels.
 
-T8 preview: H opens Troubleshooting, D cycles findings, G opens the suggested page (no automatic repair), L returns to Logs, F filters npm history. MCP Clients reports known-location audit status and launch modes. Diagnostics are local and advisory; no Remote cloud connectivity claim.
+## Safety and privacy
 
-T9 preview: English-only interface. Settings persists the landing page (P), guided first-run completion (O/F), and supports explicit Windows startup registration (A manager, W Remote, X disable, Y confirm). E reloads settings. First-run setup guides the user to existing confirmed package and connection actions. No automatic setup or startup registration. --settings prints read-only preference/registration status. See docs/TUI-MIGRATION.md.
+The dedicated installation lives under %LOCALAPPDATA%\DesktopCommander; maintenance state under %LOCALAPPDATA%\DCRManager-state; preferences under %APPDATA%\DCRManager. These are not repository files.
 
-T10 local release candidate: 1.3.0-rc.1. Build and verify a preview ZIP with Package-Preview.ps1 from a clean committed tree. Extract the entire bundle, not just the executable. The Go preview version is defined in internal/app/version.go and reported by --version and --snapshot; VERSION still identifies stable legacy 1.2.1. See docs/RELEASE-CHECKLIST.md for acceptance gates.
+The manager does not implement telemetry, globally wipe the npm cache, kill arbitrary Node.js processes or rewrite agent configurations. Package changes are staged and preserve the Remote credential directory. Stop affected DCR/MCP clients before changing packages. Backups are retained; automatic cleanup is not enabled. The current implementation performs forced process termination for explicit stop/restart. Local process status does not prove Remote server connectivity. The upstream service and npm have their own network behavior. The PowerShell bridge uses process-scoped ExecutionPolicy Bypass.
+
+Do not use the preview on a critical installation without backups. Structural backup validation is not full cryptographic authentication. External filesystem/process races and unexpected shutdowns remain possible. See [recovery](docs/RECOVERY.md), [security](SECURITY.md), and [release readiness](docs/RELEASE-CHECKLIST.md).
+
+## Development and community
+
+- [Roadmap](docs/ROADMAP.md): product milestones, scope and outstanding work.
+- [Architecture](docs/ARCHITECTURE.md): components, contracts and trust boundaries.
+- [Contributing](CONTRIBUTING.md): local setup, testing and pull requests.
+- [Changelog](CHANGELOG.md): actual version history.
+- [Third-party notices](THIRD_PARTY_NOTICES.md): dependencies and vendored development references.
+
+Run go test ./..., go vet ./..., go mod verify, Test.cmd and the PowerShell 7 suite before submitting changes. See [versioning](docs/VERSIONING.md). The existing release-candidate ZIP is a local test artifact, not an endorsed public download. No public release or hosted CI results are claimed.
+
+## License
+
+The project license is pending maintainer selection. MIT is proposed; see [licensing notes](docs/LICENSING.md). Third-party components retain their respective licenses. Do not treat the source as licensed for redistribution until a project LICENSE is adopted.
