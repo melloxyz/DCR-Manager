@@ -6,7 +6,7 @@ Last reviewed: 2026-11-24. This is the continuation entry point for the v1.4.0 d
 
 - Official repository: https://github.com/melloxyz/DCR-Manager
 - Stable source: main and annotated tag v1.3.1, commit 4ab08254ee7f0bce9eb881f6f2208685ffff8478.
-- Active development: feat/v1.4-native-backend; functional D.1b baseline 9ae1c79feb3fee69953bcbda449568460c37ac0d. Later documentation commits may advance HEAD.
+- Active development: feat/v1.4-native-backend; functional D.2 baseline 94b3f99a353470f6b23d25da843e559c89a635a3. Later documentation commits may advance HEAD.
 - Go app version: 1.4.0-dev. VERSION remains 1.3.1 until promotion. Legacy PowerShell manager remains v1.2.1. MIT license; English-only UI; Graphite Dark.
 - The original published history is authoritative. The separate sanitized RC2 publication clone was not used for publication; its history is not a development branch and must not be pushed over main. Preserve public tags and do not force-push.
 - Work in the single canonical checkout; keep the stable executable and dev executable separate. No public binary release has been made.
@@ -72,7 +72,12 @@ Keep Maintain wired to PowerShell until D.4/D.5 shared mutex, all-process guards
 
 D.2 local acceptance (2026-11-24): `go test ./... -json -count=1` passed 192 test/subtest events (108 top-level tests), with two top-level skips: 8.3 fixture alias unavailable and real npm artifact network opt-in absent. Windows PowerShell and PowerShell 7 each passed all 57 fixture tests. Vet, module verification, govulncheck v1.10.0, diff checks and the separate dev build passed; executable reports `1.4.0-dev`. The active Remote, actual caches, credentials, client preferences, startup and UI were not modified. Shared mutex, power-loss/race testing, full-tree cryptographic integrity and production acceptance remain unverified.
 
-D.2 implementation commit: 3cfb7ec2563ccfefd130b209286aa0f0136b57f4. Initial hosted Windows tests passed (45462535507). Initial Go TUI run (45462535511) exposed a test-only lexical restore-path comparison: status/version/size/token parity passed, but equivalent Windows path spellings were compared as strings. The parity test now uses validated canonical paths (existing parent identity checked by `canonicalStageRoot`) and also exercises uppercase spelling. Exact restore-token equality remains unchanged. Targeted local parity tests passed after this correction. Record corrected hosted evidence after pushing the test fix.
+D.2 implementation commit: 3cfb7ec2563ccfefd130b209286aa0f0136b57f4. Initial hosted Windows tests passed (45462535507). Initial Go TUI run (45462535511) exposed a test-only lexical restore-path comparison: status/version/size/token parity passed, but equivalent Windows path spellings were compared as strings. Test fix 94b3f99 uses validated canonical paths (existing parent identity checked by `canonicalStageRoot`) and also exercises uppercase spelling. Exact restore-token equality remains unchanged. Targeted local parity tests passed after this correction.
+
+Hosted D.2 acceptance at 94b3f99:
+- Go TUI passed: https://github.com/melloxyz/DCR-Manager/actions/runs/45462972640 (module verification, tests, vet, govulncheck and build).
+- Windows tests passed: https://github.com/melloxyz/DCR-Manager/actions/runs/45462972460 (Windows PowerShell 5.1 and PowerShell 7).
+- Implementation and test fix were committed conventionally and pushed normally to the feature branch. main, origin/main and peeled v1.3.1 remain at 4ab08254ee7f0bce9eb881f6f2208685ffff8478. No stable tag, public history or real user configuration changed.
 
 D.1b local acceptance (2026-11-24): `go test ./... -json -count=1` passed 147 test/subtest events (99 top-level tests); two top-level skips: fixture volume did not provide an 8.3 alias, and the real npm artifact test requires explicit network opt-in. Windows PowerShell and PowerShell 7 each passed all 57 fixture tests. `go vet ./...`, `go mod verify`, govulncheck v1.10.0, `git diff --check` and the separate dev build passed; executable reports `1.4.0-dev`. The artifact download, active Remote lifecycle, real credentials/preferences, interactive UI and disposable-machine crash/race acceptance were not exercised.
 
