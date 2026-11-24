@@ -26,3 +26,5 @@ The v1.4 development reader consumes a versioned internal bridge envelope for th
 Bridge schema 2 delegates all known client audits (including TOML) and Node/npm version probes to Go. Native Windows command discovery uses fixed runtime names and a constrained npm.cmd version invocation; cache/global path queries and remaining inventory are still in PowerShell. The old bridge invocation remains available for the stable legacy manager.
 
 Bridge schema 3 delegates npm directory discovery and installation/cache inventory to Go. Native cache candidates must match legacy root, count and tokens before mutations are available. Recovery and process health still rely on the legacy bridge; the next migration steps retain independent guard parity.
+
+Go now provides the recovery inventory and stage classification. Ready backup tokens must agree with independent legacy validation; cache destinations also depend on npm root agreement. The legacy bridge still performs recovery and cache cross-checks, process inventory and process health. No mutation is migrated in C.2.

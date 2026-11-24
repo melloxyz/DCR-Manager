@@ -84,15 +84,13 @@ func Read(root string) app.Reader {
 		// Until mutations migrate, require exact agreement with their legacy cache identities.
 		sameCache := cacheErr == nil && filepath.IsAbs(wire.InternalCacheRoot) && strings.EqualFold(filepath.Clean(wire.InternalCacheRoot), cache)
 		applyCacheParity(&s, inventory, sameCache)
-		if !sameCache {
-			// Cache restores depend on the same npm root; do not authorize them on disagreement.
-			for i := range s.Backups {
-				if s.Backups[i].Kind == "cache" {
-					s.Backups[i].Status = "destination-blocked"
-					s.Backups[i].Token = ""
-				}
-			}
+		local := os.Getenv("LOCALAPPDATA")
+		state := ""
+		if filepath.IsAbs(local) {
+			state = filepath.Join(local, "DCRManager-state")
 		}
+		backups, recoveryKnown := nativeRecovery(ctx, state, cache)
+		applyRecoveryParity(&s, backups, recoveryKnown, sameCache)
 		if inventory.version != s.Status.Version || inventory.installed != s.Status.Installed {
 			return app.Snapshot{}, errors.New("dedicated installation inventories disagree; refresh or use legacy diagnostics")
 		}

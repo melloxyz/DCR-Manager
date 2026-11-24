@@ -7,6 +7,8 @@
 - Migrate Codex TOML audit to go-toml/v2 and native Node/npm version probes; preserve legacy bridge compatibility.
 - Add the pinned TOML parser license and explicit unsupported-range handling.
 - Move npm directory discovery and installation/cache inventory to Go; retain exact legacy cache-token cross-checks before enabling mutations.
+- Add native backup inventory, bounded recovery tree measurement, transaction journal inspection and legacy restore-token cross-checks.
+- Improve diagnostics of hosted cache-token parity failures without weakening the comparison.
 
 ## 1.3.1
 - Update checkout and setup-go to v7 (#1, #2).
