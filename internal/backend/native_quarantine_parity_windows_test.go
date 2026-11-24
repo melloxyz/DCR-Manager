@@ -66,8 +66,18 @@ func TestNativeCacheQuarantineRecoveryParity(t *testing.T) {
 			if old.Name != r.Name || old.Status != r.Status || old.Version != r.Version || old.Token != r.Token || old.Bytes != r.Bytes || old.SizeKnown != r.SizeKnown {
 				t.Fatalf("quarantine recovery parity mismatch: status=%s", mode)
 			}
-			if mode == "ready" && probe.Target != source {
-				t.Fatal("legacy restore target mismatch")
+			if mode == "ready" {
+				// Hosted Windows may expand 8.3 aliases; compare validated canonical parents, not spelling.
+				original, e := canonicalStageRoot(source)
+				if e != nil {
+					t.Fatal("original fixture target is unsafe")
+				}
+				for _, path := range []string{probe.Target, strings.ToUpper(probe.Target)} {
+					target, e := canonicalStageRoot(path)
+					if e != nil || target != original {
+						t.Fatal("legacy restore target identity mismatch")
+					}
+				}
 			}
 		})
 	}
