@@ -1,6 +1,6 @@
 # Contributing
 
-DCR Manager is an independent Windows utility. The source is in pre-publication preparation; contribution and redistribution terms become effective once the project license is adopted.
+DCR Manager is an independent Windows utility. Contributions are accepted under the project MIT License. Submit only material that you have the right to contribute.
 
 ## Getting started
 

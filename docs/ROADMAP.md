@@ -31,11 +31,11 @@ Keyboard/mouse TUI, Graphite Dark, local system health, advisory troubleshooting
 | T8 | Diagnostics and troubleshooting | Implemented |
 | T9 | Settings, English onboarding, startup | Implemented; actual Windows sign-in pending |
 | T10 | Stabilization and local candidate | RC1 tagged |
-| T10.1 | Acceptance and public-source preparation | Local artifact tests and source preparation done; manual acceptance/license/privacy pending |
-| T10.2 | Fix acceptance findings, candidate rebuild | Pending |
+| T10.1 | Acceptance and public-source preparation | Local artifact tests and source preparation done; manual acceptance pending; MIT adopted |
+| T10.2 | Fix acceptance findings, candidate rebuild | RC2 prepared; final acceptance pending |
 | T10.3 | Stable v1.3.0 promotion | Pending acceptance |
 
-Source publication can happen separately from stable release once licensing, Git privacy and source checks are resolved. Do not label the RC as stable.
+Source publication can happen separately from stable release once Git privacy and source checks are resolved. Do not label the RC as stable.
 
 ## v1.4.0: Distribution
 

@@ -31,4 +31,4 @@ Go standard library: [notices](third_party/licenses/go-standard-library/).
 - lipgloss-theme-foundations: jaresty/nn @ 98d8c99660993e8cf1d0822739c06dd012d2f3bb; MIT; [LICENSE](.agents/skills/lipgloss-theme-foundations/LICENSE).
 - tui-design: gfargo/tui-design-skill @ 0a0ce996e00fc2a5db7f1f85495257381cc90df9; MIT; [LICENSE](.agents/skills/tui-design/LICENSE).
 
-The project license itself is pending maintainer selection; these notices do not grant a license for DCR Manager source.
+DCR Manager source is licensed under MIT; third-party material retains its original terms.

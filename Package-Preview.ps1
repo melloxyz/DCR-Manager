@@ -16,7 +16,9 @@ try{
  if(Test-Path -LiteralPath $zip){throw 'Candidate archive already exists; do not overwrite a release artifact'}
  $stage=Join-Path $dist ($name+'-'+[guid]::NewGuid().ToString('N'))
  New-Item -ItemType Directory -Path $stage|Out-Null
- $files=@('bin/dcr-manager.exe','Launch-TUI.cmd','src/Bridge.ps1','src/Core.psm1','src/Operations.psm1','src/Maintenance.psm1','src/PackageCache.psm1','src/Recovery.psm1','src/RecoveryCenter.psm1','src/Diagnostics.psm1','src/MaintenanceAction.ps1','src/audit_toml.py','docs/RELEASE-CHECKLIST.md','docs/RECOVERY.md','CHANGELOG.md')
+ $files=@('bin/dcr-manager.exe','Launch-TUI.cmd','src/Bridge.ps1','src/Core.psm1','src/Operations.psm1','src/Maintenance.psm1','src/PackageCache.psm1','src/Recovery.psm1','src/RecoveryCenter.psm1','src/Diagnostics.psm1','src/MaintenanceAction.ps1','src/audit_toml.py','docs/RELEASE-CHECKLIST.md','docs/RECOVERY.md','CHANGELOG.md','LICENSE','THIRD_PARTY_NOTICES.md')
+ $files+=@(git ls-files third_party/licenses)
+ if(!$files -or !@(git ls-files third_party/licenses).Count){throw 'Missing third-party licenses'}
  foreach($f in $files){
   $target=Join-Path $stage $f
   New-Item -ItemType Directory -Path (Split-Path $target) -Force|Out-Null

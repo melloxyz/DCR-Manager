@@ -24,3 +24,6 @@ The stable v1.2.1 legacy release is unchanged. English-only, Graphite Dark. To b
 - Initial historical path/pattern review found no matching credentials or machine identifiers; a non-noreply commit email remains. See PUBLICATION.md. This is limited pattern scanning, not exhaustive secret detection.
 - Source preparation: English README, architecture, contribution/security docs, issue/PR templates, dependency notices and CI read-only permissions. Root project license and public Git identity decision are pending.
 - Remaining acceptance: real upstream lifecycle scripts/update, authentication/reconnect, real npm cache quarantine/restore, clean Windows VM, actual sign-in and interactive TUI review. No stable release promotion or public push yet.
+
+## RC2
+MIT adopted. Go 1.26.11 and third-party notices included in the candidate build. RC1 remains unchanged. Public source publication is separate from stable binary distribution; real lifecycle, cache, update, login and interactive acceptance are still required.
