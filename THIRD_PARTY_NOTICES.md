@@ -9,7 +9,7 @@ This inventory covers Go modules used by the Windows executable at the time of t
 | charm.land/lipgloss/v2 | v2.1.1 | [Notices](third_party/licenses/charm.land_lipgloss_v2/) |
 | github.com/charmbracelet/colorprofile | v0.4.3 | [Notices](third_party/licenses/github.com_charmbracelet_colorprofile/) |
 | github.com/charmbracelet/ultraviolet | v0.0.0-20261008173134-6b8d4baf91b4 | [Notices](third_party/licenses/github.com_charmbracelet_ultraviolet/) |
-| github.com/charmbracelet/x/ansi | v0.11.9 | [Notices](third_party/licenses/github.com_charmbracelet_x_ansi/) |
+| github.com/charmbracelet/x/ansi | v0.11.10 | [Notices](third_party/licenses/github.com_charmbracelet_x_ansi/) |
 | github.com/charmbracelet/x/term | v0.2.2 | [Notices](third_party/licenses/github.com_charmbracelet_x_term/) |
 | github.com/charmbracelet/x/windows | v0.2.2 | [Notices](third_party/licenses/github.com_charmbracelet_x_windows/) |
 | github.com/clipperhouse/displaywidth | v0.11.0 | [Notices](third_party/licenses/github.com_clipperhouse_displaywidth/) |
@@ -20,7 +20,7 @@ This inventory covers Go modules used by the Windows executable at the time of t
 | github.com/rivo/uniseg | v0.4.8-0.20261110175422-3a370411ca06 | [Notices](third_party/licenses/github.com_rivo_uniseg/) |
 | github.com/xo/terminfo | v1.0.0 | [Notices](third_party/licenses/github.com_xo_terminfo/) |
 | golang.org/x/sync | v0.22.0 | [Notices](third_party/licenses/golang.org_x_sync/) |
-| golang.org/x/sys | v0.47.0 | [Notices](third_party/licenses/golang.org_x_sys/) |
+| golang.org/x/sys | v0.50.0 | [Notices](third_party/licenses/golang.org_x_sys/) |
 
 Go standard library: [notices](third_party/licenses/go-standard-library/).
 

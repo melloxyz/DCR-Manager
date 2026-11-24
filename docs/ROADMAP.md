@@ -51,3 +51,6 @@ Open-source licensing is now an earlier source-publication prerequisite, rather 
 ## v2.0.0: Complete management toolkit
 
 Manage agent integrations, migrate legacy installs, advanced connectivity diagnostics, session/log management and evaluate Linux/macOS support. These remain exploratory; existing read-only inventory does not imply full integration management.
+
+## v1.3.1 maintenance
+Dependency maintenance baseline before v1.4: four Dependabot updates, notice refresh, grouped compatible updates. No binary distribution implied.

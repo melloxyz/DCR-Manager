@@ -2,7 +2,7 @@
 
 An independent, Windows-first terminal utility for managing Desktop Commander Remote (DCR). Built with Go and Charm v2, with a Graphite Dark interface and a tested PowerShell maintenance backend.
 
-**Development status:** v1.3.0 is the maintainer-approved source baseline on main. The PowerShell fallback remains v1.2.1. Public binary distribution and full clean-machine validation are planned for v1.4.0. This is an open-source work in progress; release and publication gates are tracked in [the release checklist](docs/RELEASE-CHECKLIST.md) and [licensing notes](docs/LICENSING.md).
+**Development status:** v1.3.1 is the maintenance source baseline on main. The PowerShell fallback remains v1.2.1. Public binary distribution and full clean-machine validation are planned for v1.4.0. This is an open-source work in progress; release and publication gates are tracked in [the release checklist](docs/RELEASE-CHECKLIST.md) and [licensing notes](docs/LICENSING.md).
 
 DCR Manager is not an official Desktop Commander product and is not affiliated with its maintainers. See the [upstream project](https://github.com/wonderwhy-er/DesktopCommanderMCP) for the actual Remote service and authentication.
 

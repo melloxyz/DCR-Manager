@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1
+- Update checkout and setup-go to v7 (#1, #2).
+- Update Charm ANSI to v0.11.10 (#4) and Go x/sys to v0.50.0 (#3).
+- Refresh third-party notices and group compatible Dependabot patch updates while keeping native Windows dependencies separate.
+- Preserve v1.3.0 source tag and the v1.4 distribution gates.
+
 ## 1.3.0
 - Promote the maintainer-approved RC2 source to the v1.3.0 baseline on main.
 - Preserve MIT licensing, the patched Go toolchain, Graphite Dark and English-only scope.
