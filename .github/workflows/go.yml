@@ -1,5 +1,7 @@
 name: Go TUI
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: windows-latest
@@ -11,4 +13,5 @@ jobs:
       - run: go mod verify
       - run: go test ./... -count=1
       - run: go vet ./...
+      - run: go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
       - run: go build ./cmd/dcr-manager
