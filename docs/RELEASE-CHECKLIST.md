@@ -14,3 +14,6 @@ The stable v1.2.1 legacy release is unchanged. English-only, Graphite Dark. To b
 - Verify real cache quarantine/restore and package rollback, credentials preservation and actual Windows sign-in behavior.
 - Check performance on representative hosts, dependency vulnerability scanning, hosted CI, release licensing/branding and distribution documentation.
 - Only after acceptance: promote version and merge main; public distribution remains v1.4.0.
+
+## Maintainer approval
+2026-11-24: maintainer approved the RC1 delivery in the development conversation. Approval records acceptance of the delivered candidate, not evidence that every manual check was executed. RC1 automated regression and extracted bundle smoke test passed; interactive visual acceptance, isolated real npm/lifecycle/cache/restore checks, Windows sign-in and remaining release gates are not independently verified. Keep stable v1.2.1 and main unchanged until acceptance evidence is recorded. No public publishing authorized by this record.
