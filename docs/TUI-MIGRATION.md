@@ -1,4 +1,4 @@
-﻿# v1.3.0 development preview (T1-T4)
+# v1.3.0 development preview (T1-T4)
 
 The Graphite Dark design uses #212121 background, #171717 sidebar, #292929 panels, #383838 borders, #ECECEC primary text and #A0A0A0 muted text. Semantic green, amber and red are restricted to status. Layout follows the approved sidebar and dashboard concept within terminal cell constraints. Minimum useful viewport is 42x10; sidebar collapses below 76 columns. Recommended terminal: Windows Terminal, 110x35 or larger, UTF-8, truecolor font with box drawing support.
 
@@ -7,3 +7,6 @@ Run Launch-TUI.cmd or bin/dcr-manager.exe. Build-TUI.cmd builds locally with Go.
 Architecture: cmd/dcr-manager is the entrypoint, internal/app holds typed contracts, internal/backend runs the existing read-only Windows PowerShell bridge with a timeout, internal/tui renders Bubble Tea/Lip Gloss and Bubbles viewport. All nine pages display real read-only diagnostics or fixed build metadata. Legacy Launch.cmd remains the supported mutation workflow. The Go executable does not yet perform start/stop, repairs, cache quarantine, backup restore, or config writes. No cloud-connectivity assertion.
 
 T1 foundation, T2 theme, T3 shell and T4 dashboard are implemented as a development preview. Pending: native adapters, mutations with confirmation and regression parity, localization, settings persistence, independent distribution, visual comparison in a real interactive terminal, clean Windows VM tests, release review. Do not tag v1.3.0 until acceptance criteria are met; stable VERSION stays 1.2.1 during development.
+
+## Visual stabilization before T5
+All visible cells are painted explicitly with the Graphite Dark palette, including background gaps, borders, sidebar, header, footer and scroll viewport. Nested SGR resets restore the local surface. The frame uses exactly the terminal width and height. The sidebar collapses in narrow or short terminals; navigation focus appears in the footer. Package cards use human-readable labels and semantic status, and all diagnostic pages share the card styles. Windows diagnostic subprocesses use CREATE_NO_WINDOW to avoid attaching to the interactive console. Visual regression tests cover all nine pages at representative viewport sizes, explicit background coverage, exact palette and package labels. Render a particular page with --render --render-page 3. Interactive Windows Terminal visual acceptance remains pending.

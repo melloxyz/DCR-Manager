@@ -14,6 +14,7 @@ import (
 func main() {
 	snapshot := flag.Bool("snapshot", false, "print read-only diagnostic JSON")
 	render := flag.Bool("render", false, "render dashboard from real diagnostic data")
+	page := flag.Int("render-page", 1, "diagnostic render page (1-9)")
 	version := flag.Bool("version", false, "print development version")
 	flag.Parse()
 	if *version {
@@ -37,7 +38,11 @@ func main() {
 				os.Exit(1)
 			}
 		} else {
-			fmt.Println(tui.RenderSnapshot(s, 110, 35))
+			if *page < 1 || *page > 9 {
+				fmt.Fprintln(os.Stderr, "render-page must be 1-9")
+				os.Exit(2)
+			}
+			fmt.Println(tui.RenderPageSnapshot(s, 110, 35, *page-1))
 		}
 		return
 	}
