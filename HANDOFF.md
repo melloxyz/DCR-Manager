@@ -6,7 +6,7 @@ Last reviewed: 2026-11-24. This is the continuation entry point for the v1.4.0 d
 
 - Official repository: https://github.com/melloxyz/DCR-Manager
 - Stable source: main and annotated tag v1.3.1, commit 4ab08254ee7f0bce9eb881f6f2208685ffff8478.
-- Active development: feat/v1.4-native-backend; D.1b adds isolated native package switching after ec72ee9984aa667128a652464e88369e383a31a2. See recent feature-branch commits for implementation and evidence updates.
+- Active development: feat/v1.4-native-backend; functional D.1b baseline 9ae1c79feb3fee69953bcbda449568460c37ac0d. Later documentation commits may advance HEAD.
 - Go app version: 1.4.0-dev. VERSION remains 1.3.1 until promotion. Legacy PowerShell manager remains v1.2.1. MIT license; English-only UI; Graphite Dark.
 - The original published history is authoritative. The separate sanitized RC2 publication clone was not used for publication; its history is not a development branch and must not be pushed over main. Preserve public tags and do not force-push.
 - Work in the single canonical checkout; keep the stable executable and dev executable separate. No public binary release has been made.
@@ -67,7 +67,12 @@ Keep Maintain wired to PowerShell until D.4/D.5 shared mutex, all-process guards
 
 ## Verified baseline and commands
 
-D.1b local acceptance (2026-11-24): `go test ./... -json -count=1` passed 147 test/subtest events (99 top-level tests); two top-level skips: fixture volume did not provide an 8.3 alias, and the real npm artifact test requires explicit network opt-in. Windows PowerShell and PowerShell 7 each passed all 57 fixture tests. `go vet ./...`, `go mod verify`, govulncheck v1.10.0, `git diff --check` and the separate dev build passed; executable reports `1.4.0-dev`. The artifact download, active Remote lifecycle, real credentials/preferences, interactive UI and disposable-machine crash/race acceptance were not exercised. Hosted results for this implementation must be recorded after pushing the feature branch; earlier HEAD 930aa12 had passing Go TUI (45434550718) and Windows tests (45434550414).
+D.1b local acceptance (2026-11-24): `go test ./... -json -count=1` passed 147 test/subtest events (99 top-level tests); two top-level skips: fixture volume did not provide an 8.3 alias, and the real npm artifact test requires explicit network opt-in. Windows PowerShell and PowerShell 7 each passed all 57 fixture tests. `go vet ./...`, `go mod verify`, govulncheck v1.10.0, `git diff --check` and the separate dev build passed; executable reports `1.4.0-dev`. The artifact download, active Remote lifecycle, real credentials/preferences, interactive UI and disposable-machine crash/race acceptance were not exercised.
+
+Hosted D.1b acceptance at implementation commit 9ae1c79:
+- Go TUI passed: https://github.com/melloxyz/DCR-Manager/actions/runs/45442116558 (module verification, tests, vet, govulncheck and build).
+- Windows tests passed: https://github.com/melloxyz/DCR-Manager/actions/runs/45442116750 (Windows PowerShell 5.1 and PowerShell 7).
+- Implementation was committed with Conventional Commits and pushed normally to the feature branch. main, origin/main and the peeled v1.3.1 tag remained at 4ab08254ee7f0bce9eb881f6f2208685ffff8478. No public history was rewritten.
 
 At ec72ee9, 88 top-level Go tests were listed (including environment-dependent and opt-in skips), 57 distinct PowerShell tests. The Go suite, vet, mod verify, govulncheck and dev build passed locally. Real pinned npm artifact test for 0.3.4 passed in 35.48 seconds with --ignore-scripts; the fixture installation remained unchanged. No full production install or authentication was tested. Local read-only snapshot reported three Remote processes, one eligible cache and empty recovery inventory in the earlier environment; refresh instead of assuming these values.
 
