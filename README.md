@@ -25,3 +25,6 @@ See docs/ROADMAP.md. License not selected; obtain permission before redistributi
 CLI additions: Launch.cmd -Mode inventory / clients / runtime. Maintenance.psm1 contains inventory and recovery logic.
 
 Recovery: cache restore refuses overwrite and checks current npm cache path; parent-process diagnosis is advisory; backup retention review flags age >=30 days without deletion. Use Launch.cmd -Mode health / backups, or -Mode config -ConfigPath "path". See docs/RECOVERY.md.
+
+## v1.3 development preview
+On feat/v1.3-tui, run Launch-TUI.cmd for the new Graphite Dark Go TUI. Build-TUI.cmd compiles it. The legacy manager remains available with Launch.cmd. See docs/TUI-MIGRATION.md for scope and limitations. The stable release remains v1.2.1.
