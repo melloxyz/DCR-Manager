@@ -28,3 +28,5 @@ Bridge schema 2 delegates all known client audits (including TOML) and Node/npm 
 Bridge schema 3 delegates npm directory discovery and installation/cache inventory to Go. Native cache candidates must match legacy root, count and tokens before mutations are available. Recovery and process health still rely on the legacy bridge; the next migration steps retain independent guard parity.
 
 Go now provides the recovery inventory and stage classification. Ready backup tokens must agree with independent legacy validation; cache destinations also depend on npm root agreement. The legacy bridge still performs recovery and cache cross-checks, process inventory and process health. No mutation is migrated in C.2.
+
+Native process inventory now reconciles the entire DCR set against legacy rows and counts; parent health is obtained through Windows handles. A separate native Node preflight precedes maintenance, but the legacy transaction retains its original in-lock guards. The PowerShell bridge remains an independent parity source for cache, recovery and processes until native maintenance/acceptance are complete.

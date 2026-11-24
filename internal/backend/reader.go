@@ -104,7 +104,7 @@ func Read(root string) app.Reader {
 			return app.Snapshot{}, errors.New("diagnostic timed out or was cancelled")
 		}
 		s.ManagerVersion = app.Version
-		attachNativeIdentities(&s)
+		attachNativeInventory(&s)
 		return s, nil
 	}
 }

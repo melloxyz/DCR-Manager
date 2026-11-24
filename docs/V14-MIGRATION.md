@@ -6,7 +6,7 @@ Goal: remove PowerShell/Python from the Go application's runtime path without we
 | --- | --- | --- |
 | V14-01A | Native bounded npm history and six JSON MCP locations | Implemented; local parity and regression |
 | V14-01B | Native TOML parsing, runtime/version and npm command discovery | Implemented; local parity and regression |
-| V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | In progress (C.1 and C.2 implemented locally) |
+| V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | Implemented locally; hosted token parity pending |
 | V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | Pending |
 | V14-01E | Cross-backend parity, fault injection, legacy interoperability, clean-profile acceptance | Pending |
 
@@ -41,7 +41,7 @@ Local read-only parity: Node v24.15.0, npm 11.12.1, declared >=22.12.0 and meets
 | --- | --- | --- |
 | V14-01C.1 | Native npm directory discovery, installation and cache inventory | Implemented; local parity and regression |
 | V14-01C.2 | Native recovery inventory, transaction journals and restore-token parity | Implemented; local parity and regression; hosted parity pending |
-| V14-01C.3 | Native process health and independent mutation-guard parity | Pending |
+| V14-01C.3 | Native process health and independent mutation-guard parity | Implemented; local parity and regression |
 
 C.1 obtains npm cache and global node_modules paths through fixed read-only npm commands. The command runner retains the caller working directory to match existing maintenance behavior, uses the system cmd.exe and fixed arguments, bounded output and deadlines. Discovery requires absolute valid paths. Go inspects dedicated/global installations and exclusive npx cache directories using bounded manifest reads, path/identity checks and fixed output classifications. The inventory is not an exhaustive scan of all possible Node/npm installations. The cache scan has a cooperative five-second deadline and a 10,000-directory-entry cap. Extra dependency/workspace declarations are conservatively rejected. Unknown/unsupported layouts may differ from the permissive historical inventory. A dedicated status mismatch rejects the snapshot rather than displaying unsafe confirmation data.
 
@@ -57,3 +57,14 @@ The Go reader now scans the known state directory for exact package-backup, cach
 Package backups require exclusive package ownership, an exact pinned version, a regular entry point and a lockfile. Cache backups require valid sidecar metadata identifying the same backup, an empty direct hex child of the current npm _npx directory and a matching volume. SHA-256 tokens reproduce the legacy contract using lowercased path, Windows creation ticks, modification ticks, byte and entry counts, version, manifest hashes and cache metadata hash. Native tokens must match the independent legacy ready row before restoration is enabled. Missing rows, incomplete inventory, root disagreement or token mismatch fail closed. The legacy bridge still performs independent recovery/cache inspection and all mutations. No actual backup files or credentials are modified by the new reader.
 
 Local validation: isolated package and cache backup fixtures match legacy restore tokens exactly; stale manifest tokens, occupied destinations, retention review, cancelled scans and transaction state are covered. The real state inventory was empty in both implementations. The previous C.1 hosted Go job failed TestCacheTokenLegacyParity despite local success; the fixture test now uses UTF-8 output, suppresses PowerShell warnings and separately reports parsing/count/identity mismatches. This improves diagnosis, not evidence of a confirmed root cause. Hosted CI must pass before C.1/C.2 acceptance is closed. Symlink privilege-dependent test and clean-profile acceptance remain pending.
+
+
+## V14-01C.3: Native process inventory and health
+
+The Go reader now constructs DCR process rows, Remote/MCP roles, location and root counts from native Node command-line inspection and verified creation identities. Parent assessment uses an independent Toolhelp process snapshot and limited-information handles for relevant parent PIDs. Missing parents, reused PIDs and inaccessible/unknown creation times are distinct advisory states; they do not prove an orphan or justify termination. No raw arguments are serialized.
+
+Until C/E acceptance is complete, compare the entire native DCR process set (PID, parent, role, location, counts) with the independent legacy inventory, not only Remote PIDs. On mismatch or inspection error preserve the legacy display but clear process identities and refuse controls. The native assessment is used only after successful inventory reconciliation. A failed process wait/empty command line also fails closed. Actual process stop/start logic retains the existing native handle and identity checks.
+
+The Go maintenance adapter performs an additional read-only native Node-process preflight before delegating to the PowerShell transaction. Package and restore requests refuse active DCR references; cache quarantine refuses references to the selected cache path. Inaccessible or uninspectable Node processes block maintenance. This preflight does not replace the legacy in-mutex guard, which checks broader process references, validates paths/tokens and repeats checks during the transaction. No native mutation engine is enabled yet. Native classification deliberately supports known exact entry scripts, not arbitrary launchers. External races remain possible.
+
+Local validation: all three active Remote rows and their parent assessments matched the legacy snapshot (one Remote root, zero separate MCP processes, two present parents and one missing parent). No actual process was stopped. Tests cover role/location classification, parent PID reuse and unknown parent times, full-set reconciliation and conservative native maintenance preflight. Hosted C.1/C.2 parity remains a release gate: removing inherited PSModulePath allowed legacy fixture rows to be produced on the runner but the tokens still differ. Additional diagnostics report component equality without exposing private paths. Do not interpret local agreement as hosted acceptance.

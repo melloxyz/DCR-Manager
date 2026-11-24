@@ -70,10 +70,13 @@ func nativeRows() ([]nativeCandidate, error) {
 			} else {
 				created, ce := birth(h)
 				args, ae := commandArgs(h)
-				state, _ := windows.WaitForSingleObject(h, 0)
+				state, waitErr := windows.WaitForSingleObject(h, 0)
 				windows.CloseHandle(h)
+				if waitErr != nil {
+					return nil, errors.New("cannot verify Node process state")
+				}
 				if state != windows.WAIT_OBJECT_0 {
-					if ce != nil || ae != nil {
+					if ce != nil || ae != nil || created == 0 || len(args) == 0 {
 						return nil, fmt.Errorf("cannot verify Node process %d", e.ProcessID)
 					}
 					out = append(out, nativeCandidate{ID: app.ProcessIdentity{PID: int(e.ProcessID), Created: created}, Parent: int(e.ParentProcessID), Args: args})

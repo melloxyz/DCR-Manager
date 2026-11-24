@@ -83,6 +83,9 @@ func Maintain(root string) app.Maintainer {
 		if err = ctx.Err(); err != nil {
 			return err
 		}
+		if err = preflightNativeMaintenance(ctx, r); err != nil {
+			return err
+		}
 		// Do not kill the bridge in the middle of a package transaction.
 		// npm fetch retries/timeouts are bounded in the script.
 		base := []string{"-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", filepath.Join(root, "src", "MaintenanceAction.ps1")}
