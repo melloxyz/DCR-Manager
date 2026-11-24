@@ -38,7 +38,7 @@ Escopo de produto fornecido pelo mantenedor em 2026-11-24. As etapas T1-T10 são
 | T7 | Backups, recuperação, inventário de estágios e retenção | Implementada; restauração real isolada pendente |
 | T8 | Auditoria MCP, logs e assistente de resolução de problemas | Implementada; validação de UX pendente |
 | T9 | Configurações persistentes, onboarding em inglês e inicialização com Windows (opt-in e reversível) | Implementada; aceitação visual e login real pendentes |
-| T10 | Aceitação funcional, UX, regressões, validação de lifecycle e empacotamento de preview | Pendente |
+| T10 | Estabilização, regressões e empacotamento local | RC1 preparada; aceite interativo e validação real pendentes |
 
 ## v1.4.0 - Distribuição
 - Avaliar migração para Go: antecipada e aprovada na v1.3.0; concluir avaliação de dependências remanescentes e portabilidade.

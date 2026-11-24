@@ -20,6 +20,10 @@ func main() {
 	settings := flag.Bool("settings", false, "print read-only manager preferences and startup registration")
 	login := flag.Bool("start-remote-on-login", false, "start Remote if verified stopped")
 	flag.Parse()
+	if flag.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "unexpected positional arguments")
+		os.Exit(2)
+	}
 	if *version {
 		fmt.Println(tui.Version)
 		return
@@ -78,7 +82,8 @@ func main() {
 				fmt.Fprintln(os.Stderr, "render-page must be 1-9")
 				os.Exit(2)
 			}
-			fmt.Println(tui.RenderPageSnapshot(s, 110, 35, *page-1))
+			m := tui.New(nil).WithOperator(backend.Operate(root)).WithMaintainer(backend.Maintain(root)).WithSettings(backend.ReadSettings(), backend.ChangeSettings)
+			fmt.Println(m.RenderAt(s, 110, 35, *page-1))
 		}
 		return
 	}

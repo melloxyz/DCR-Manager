@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const Version = "1.3.0-dev"
+const Version = app.Version
 
 var pages = []string{"Overview", "Connection", "Packages", "Processes", "Cache", "Recovery", "MCP Clients", "Logs", "Settings"}
 var glyphs = []string{"▦", "↔", "□", "≡", "▤", "◇", "⊞", "≔", "⚙"}
@@ -79,6 +79,9 @@ func (m *Model) sync() {
 	m.vp.SetWidth(m.paneWidth())
 	m.vp.SetHeight(max(1, m.height-3))
 	m.vp.SetContent(m.content(m.paneWidth()))
+	if m.confirming() {
+		m.vp.GotoTop()
+	}
 }
 func (m *Model) selectPage(p int) {
 	next := (p + len(pages)) % len(pages)
@@ -212,6 +215,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
+	if m.confirming() || m.busy {
+		return m, nil
+	}
 	var cmd tea.Cmd
 	m.vp, cmd = m.vp.Update(msg)
 	return m, cmd
@@ -238,7 +244,27 @@ func metric(w int, title, val, desc, c string) string {
 	inner := max(1, w-4)
 	return panel(w, label(ansi.Truncate(title, inner, "…"))+"\n"+lg.NewStyle().Bold(true).Foreground(lg.Color(c)).Render(ansi.Truncate(val, inner, "…"))+"\n"+label(ansi.Truncate(desc, inner, "…")))
 }
+func (m Model) confirming() bool {
+	return m.pending != "" || m.maintenancePending.Action != "" || m.settingsPending.Kind != ""
+}
+func (m Model) confirmationFits() bool {
+	if !m.confirming() || m.width < 50 || m.height < 14 {
+		return false
+	}
+	return strings.Count(m.content(m.paneWidth()), "\n")+1 <= m.height-3
+}
 func (m Model) content(w int) string {
+	if m.confirming() {
+		out := bold("Confirm action") + "\n"
+		switch {
+		case m.pending != "":
+			return out + m.actionPanel(w)
+		case m.maintenancePending.Action != "":
+			return out + m.maintenanceOverlay(w)
+		default:
+			return out + m.settingsContent(w)
+		}
+	}
 	heading := []string{"System overview", "Connection", "Packages", "Processes", "Cache manager", "Recovery center", "MCP clients", "Diagnostic logs", "Settings"}[m.page]
 	desc := []string{"Monitor your Desktop Commander environment.", "Local Remote process status and session inventory.", "Installed package versions and runtime requirements.", "Inspect the DCR process tree.", "Find exclusive Desktop Commander npm caches.", "Review preserved backups and recovery options.", "Read-only audit of known user configurations.", "Sanitized npm error history.", "Graphite Dark / workspace preferences."}[m.page]
 	if m.page == 7 && m.troubleshooting {
@@ -252,6 +278,12 @@ func (m Model) content(w int) string {
 	if m.err != "" {
 		out += "\n" + colorText("Diagnostic failed: "+safe(m.err), "#E57373") + "\n"
 	}
+	if m.err != "" && m.page != 8 {
+		return out + "\n" + label("Snapshot unavailable. Press R to retry.")
+	}
+	if m.loading && m.page != 8 && !m.busy {
+		return out + "\n" + label("Waiting for a fresh snapshot.")
+	}
 	if !m.ready && m.page != 8 {
 		return out + "\n" + label("No verified snapshot yet. Press R to retry.")
 	}
@@ -260,15 +292,17 @@ func (m Model) content(w int) string {
 	case 0:
 		remote, rc := "Stopped", "#E3B341"
 		if s.RemoteProcesses > 0 {
-			remote, rc = "Running", "#66BB80"
+			remote, rc = "Running locally", "#66BB80"
 		}
 		version := versionLabel(s.Version)
 		if s.Version == "" || s.Version == "absent" || s.Version == "unknown" {
-			version = "Unknown"
+			version = versionLabel(s.Version)
 		}
+		cacheValue := fmt.Sprintf("%02d", s.CacheCandidates)
 		cacheDesc := "No candidates"
 		if !s.CacheKnown {
-			cacheDesc = "Cache unavailable"
+			cacheValue = "Not assessed"
+			cacheDesc = "Inventory unavailable"
 		} else if s.CacheCandidates > 0 {
 			cacheDesc = "Maintenance available"
 		}
@@ -276,7 +310,7 @@ func (m Model) content(w int) string {
 		if s.CacheCandidates > 0 {
 			cc = "#E3B341"
 		}
-		cards := [][4]string{{"Remote status", remote, fmt.Sprintf("%d local session(s)", s.RemoteRoots), rc}, {"Installed version", version, "Dedicated install", "#ECECEC"}, {"Active processes", fmt.Sprintf("%02d", s.RemoteProcesses), "Remote process count", "#ECECEC"}, {"Legacy cache", fmt.Sprintf("%02d", s.CacheCandidates), cacheDesc, cc}}
+		cards := [][4]string{{"Remote status", remote, fmt.Sprintf("%d local session(s)", s.RemoteRoots), rc}, {"Installed version", version, "Dedicated install", "#ECECEC"}, {"Active processes", fmt.Sprintf("%02d", s.RemoteProcesses), "Remote process count", "#ECECEC"}, {"Legacy cache", cacheValue, cacheDesc, cc}}
 		out += "\n"
 		if w >= 48 {
 			a := (w - 1) / 2
@@ -329,8 +363,14 @@ func (m Model) content(w int) string {
 }
 func RenderSnapshot(s app.Snapshot, w, h int) string { return RenderPageSnapshot(s, w, h, 0) }
 func RenderPageSnapshot(s app.Snapshot, w, h, page int) string {
-	m := New(nil)
+	return New(nil).RenderAt(s, w, h, page)
+}
+
+// RenderAt uses configured controls but never executes their commands.
+func (m Model) RenderAt(s app.Snapshot, w, h, page int) string {
 	m.ready = true
+	m.loading = false
+	m.err = ""
 	m.data = s
 	m.updated = time.Now()
 	m.width = w

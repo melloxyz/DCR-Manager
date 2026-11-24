@@ -40,6 +40,7 @@ type Backup struct {
 	Review                       bool
 }
 type Snapshot struct {
+	ManagerVersion      string
 	LogsKnown           bool
 	RecoveryKnown       bool
 	ProcessControlReady bool

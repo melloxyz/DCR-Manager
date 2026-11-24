@@ -55,7 +55,11 @@ func (m Model) cacheContent(w int) string {
 	} else if s.CacheCandidates > 0 {
 		state, c = "Review available", "#E3B341"
 	}
-	out := "\n" + panel(w, line(w-4, bold("npm cache"), colorText(state, c))+"\n"+line(w-4, label("Exclusive candidates"), fmt.Sprint(s.CacheCandidates)))
+	count := fmt.Sprint(s.CacheCandidates)
+	if !s.CacheKnown {
+		count = "Unknown"
+	}
+	out := "\n" + panel(w, line(w-4, bold("npm cache"), colorText(state, c))+"\n"+line(w-4, label("Exclusive candidates"), count))
 	for _, p := range m.data.Installations {
 		if p.Kind == "npx" {
 			out += "\n\n" + panel(w, line(w-4, bold("Legacy npm cache"), colorText("Legacy", "#E3B341"))+"\n"+bold(versionLabel(p.Version))+"\n"+label("Dedicated DCR cache candidate"))

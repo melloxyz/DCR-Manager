@@ -63,7 +63,10 @@ func packageName(kind string) string {
 	return "Other installation"
 }
 func versionLabel(v string) string {
-	if v == "" {
+	if v == "absent" {
+		return "Not installed"
+	}
+	if v == "" || v == "unknown" {
 		return "Unknown"
 	}
 	return "v" + strings.TrimPrefix(safe(v), "v")

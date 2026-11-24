@@ -44,6 +44,16 @@ func (m Model) actionCmd(a app.RemoteAction) tea.Cmd {
 
 // Handle confirmation before global navigation. I/O occurs only in tea.Cmd.
 func (m Model) actionKey(k string) (Model, tea.Cmd, bool) {
+	if m.confirming() && k == "y" && !m.confirmationFits() {
+		m.pending = ""
+		m.maintenancePending = app.MaintenanceRequest{}
+		m.settingsPending = app.SettingsRequest{}
+		m.actionNotice = "Confirmation cancelled: resize terminal."
+		m.maintenanceNotice = m.actionNotice
+		m.settingsNotice = m.actionNotice
+		m.sync()
+		return m, nil, true
+	}
 	if m.busy {
 		return m, nil, true
 	}

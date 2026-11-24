@@ -1,4 +1,4 @@
-﻿name: Go TUI
+name: Go TUI
 on: [push, pull_request]
 jobs:
   test:
@@ -8,6 +8,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./...
+      - run: go mod verify
+      - run: go test ./... -count=1
       - run: go vet ./...
       - run: go build ./cmd/dcr-manager

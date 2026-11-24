@@ -56,12 +56,16 @@ func (m Model) View() tea.View {
 	if m.focus {
 		focus = "Content"
 	}
-	hint := " Up/Down Navigate  Tab Focus  H Help  R Refresh  Q Quit"
+	hint := " 1-9 Pages  Tab Focus  PgUp/PgDn Scroll  H Help  R Refresh  Q Quit"
 	if w < 90 {
 		hint = " 1-9 Pages  H Help  R Refresh  Q Quit"
 	}
 	if m.pending != "" || m.maintenancePending.Action != "" || m.settingsPending.Kind != "" {
-		hint = " Y Confirm   N/Esc Cancel"
+		if m.confirmationFits() {
+			hint = " Y Confirm   N/Esc Cancel"
+		} else {
+			hint = " Resize to confirm   N/Esc Cancel"
+		}
 	} else if m.busy {
 		hint = " Operation in progress..."
 	} else if m.page == 1 && m.operator != nil {
@@ -82,9 +86,9 @@ func (m Model) View() tea.View {
 	}
 	if m.page == 8 && !m.busy && m.settingsPending.Kind == "" && m.settingsOperator != nil {
 		if m.onboarding {
-			hint = " I Packages  C Connection  F Finish  O Settings"
+			hint = " I Packages  C Connection  F Finish  O Settings  Q Quit"
 		} else {
-			hint = " P Landing  A Manager  W Remote  X Disable  O Setup"
+			hint = " P Landing  A Manager  W Remote  X Disable  O Setup  Q Quit"
 		}
 	}
 	footer := paintRow(label(ansi.Truncate(hint, max(1, w-len(focus)-3), "…"))+"  "+label(focus), w, "#171717")

@@ -14,20 +14,36 @@ import (
 	"time"
 )
 
-func Root() (string, error) {
-	paths := []string{}
-	if exe, err := os.Executable(); err == nil {
-		paths = append(paths, filepath.Dir(exe), filepath.Dir(filepath.Dir(exe)))
-	}
-	if cwd, err := os.Getwd(); err == nil {
-		paths = append(paths, cwd)
+var bundleScripts = []string{"Bridge.ps1", "Core.psm1", "Operations.psm1", "Maintenance.psm1", "PackageCache.psm1", "Recovery.psm1", "RecoveryCenter.psm1", "Diagnostics.psm1", "MaintenanceAction.ps1", "audit_toml.py"}
+
+func rootForExecutable(exe string) (string, error) {
+	dir := filepath.Dir(exe)
+	paths := []string{dir}
+	if strings.EqualFold(filepath.Base(dir), "bin") {
+		paths = append(paths, filepath.Dir(dir))
 	}
 	for _, p := range paths {
-		if info, err := os.Stat(filepath.Join(p, "src", "Bridge.ps1")); err == nil && !info.IsDir() {
+		complete := true
+		for _, name := range bundleScripts {
+			path := filepath.Join(p, "src", name)
+			info, err := os.Lstat(path)
+			if err != nil || !info.Mode().IsRegular() {
+				complete = false
+				break
+			}
+		}
+		if complete {
 			return p, nil
 		}
 	}
-	return "", errors.New("source bundle not found; keep the executable beside src or in bin")
+	return "", errors.New("complete source bundle not found beside executable or its bin directory")
+}
+func Root() (string, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return "", errors.New("cannot locate executable")
+	}
+	return rootForExecutable(exe)
 }
 func Read(root string) app.Reader {
 	return func(parent context.Context) (app.Snapshot, error) {
@@ -52,6 +68,7 @@ func Read(root string) app.Reader {
 		if s.Status.Version == "" {
 			return s, errors.New("diagnostic returned incomplete data")
 		}
+		s.ManagerVersion = app.Version
 		attachNativeIdentities(&s)
 		return s, nil
 	}
