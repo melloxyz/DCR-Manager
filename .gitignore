@@ -1,0 +1,17 @@
+legacy/
+*.log
+*.zip
+*.tmp
+.env
+reports/
+
+# Local state and build artifacts
+__pycache__/
+*.pyc
+dist/
+bin/
+*.exe
+*.pdb
+DCRManager-state/
+node_modules/
+*.local.json
