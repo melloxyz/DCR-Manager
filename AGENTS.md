@@ -1,6 +1,6 @@
 # DCR Manager engineering instructions
 
-Read README.md, docs/TUI-MIGRATION.md and docs/VERSIONING.md before work. Keep main at the stable tag until release acceptance; work on feat/v1.3-tui. Conventional Commits, test and vet, no fabricated versions.
+Read README.md, docs/TUI-MIGRATION.md and docs/VERSIONING.md before work. main is the official reviewed source baseline. Use focused feature/fix branches for v1.4 work, and merge only after tests and review. Never rewrite public history. Conventional Commits, test and vet, no fabricated versions.
 
 Project-scoped agent skills are installed in .agents/skills. Read SKILL.md and only relevant references:
 - golang-tui: Bubble Tea v2, asynchronous commands, model/update and terminal compatibility.

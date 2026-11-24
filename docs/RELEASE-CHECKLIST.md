@@ -27,3 +27,6 @@ The stable v1.2.1 legacy release is unchanged. English-only, Graphite Dark. To b
 
 ## RC2
 MIT adopted. Go 1.26.11 and third-party notices included in the candidate build. RC1 remains unchanged. Public source publication is separate from stable binary distribution; real lifecycle, cache, update, login and interactive acceptance are still required.
+
+## v1.3.0 source milestone
+2026-11-24: maintainer explicitly approved v1.3.0 and requested consolidation on main and progression to v1.4.0. This supersedes the earlier promotion hold for the source milestone only. RC2's hosted Go TUI and Windows tests passed. Independent clean-profile Remote authentication/reconnect, real upstream lifecycle scripts/update, cache restore, actual Windows sign-in and cross-machine interactive acceptance are not asserted as completed; they remain v1.4 distribution gates. No public binary release is created by the source tag.

@@ -6,7 +6,7 @@ This is the public product roadmap. Implemented means code exists and has fixtur
 | --- | --- | --- |
 | v1.1.0 | Structural foundation | Historical |
 | v1.2.x | Advanced management and reliability | Stable legacy baseline v1.2.1 |
-| v1.3.0 | User experience and TUI | Release candidate; acceptance ongoing |
+| v1.3.0 | User experience and TUI | Maintainer-approved source baseline |
 | v1.4.0 | Distribution and portability | Planned |
 | v2.0.0 | Complete management toolkit | Exploratory |
 
@@ -30,16 +30,16 @@ Keyboard/mouse TUI, Graphite Dark, local system health, advisory troubleshooting
 | T7 | Recovery and retention review | Implemented; full upstream acceptance pending |
 | T8 | Diagnostics and troubleshooting | Implemented |
 | T9 | Settings, English onboarding, startup | Implemented; actual Windows sign-in pending |
-| T10 | Stabilization and local candidate | RC1 tagged |
-| T10.1 | Acceptance and public-source preparation | Local artifact tests and source preparation done; manual acceptance pending; MIT adopted |
-| T10.2 | Fix acceptance findings, candidate rebuild | RC2 prepared; final acceptance pending |
-| T10.3 | Stable v1.3.0 promotion | Pending acceptance |
+| T10 | Stabilization and local candidate | RC1 and RC2 built locally |
+| T10.1 | Acceptance and public-source preparation | Source preparation and local artifact tests complete; MIT adopted |
+| T10.2 | Fix acceptance findings, candidate rebuild | RC2 completed |
+| T10.3 | Stable v1.3.0 promotion | Approved by maintainer; source baseline promoted |
 
-Source publication can happen separately from stable release once Git privacy and source checks are resolved. Do not label the RC as stable.
+The v1.3.0 source milestone is approved. Remaining independent real-world acceptance evidence is tracked as a v1.4 distribution gate; no public binary release is implied.
 
 ## v1.4.0: Distribution
 
-- V14-01: Assess remaining PowerShell/Python dependencies and native parity; retain safe fallback until tested.
+- V14-01 (next): Audit remaining PowerShell/Python dependencies and define native parity, migration order and acceptance tests; retain safe fallback until tested.
 - V14-02: Portable Windows AMD64 executable or self-contained bundle; explicit external prerequisites.
 - V14-03: Reproducible build/release pipeline, license/notice packaging, checksums and provenance.
 - V14-04: Public documentation, installation/uninstallation, version support and contributor workflow.

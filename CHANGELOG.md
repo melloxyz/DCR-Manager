@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+- Promote the maintainer-approved RC2 source to the v1.3.0 baseline on main.
+- Preserve MIT licensing, the patched Go toolchain, Graphite Dark and English-only scope.
+- Keep legacy PowerShell v1.2.1 available as fallback.
+- Separate source milestone from public binary distribution; outstanding real-world acceptance checks move into v1.4 distribution gates.
+
 ## 1.3.0-rc.2
 - Require patched Go 1.26.11; add govulncheck to CI.
 - Prepare English public documentation, contribution/security policies, issue templates and dependency notices.
