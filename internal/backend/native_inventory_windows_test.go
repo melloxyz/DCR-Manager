@@ -6,7 +6,6 @@ import (
 	"context"
 	"dcr-manager/internal/app"
 	"encoding/json"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -27,11 +26,14 @@ func TestCacheTokenLegacyParity(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference='Stop'; $WarningPreference='SilentlyContinue'; $ProgressPreference='SilentlyContinue'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); Import-Module $env:DCR_TEST_MODULE; ConvertTo-Json -InputObject @(Get-DcrT6Caches $env:DCR_TEST_CACHE | Select-Object id,version,token) -Compress")
-	cmd.Env = append(os.Environ(), "DCR_TEST_MODULE="+module, "DCR_TEST_CACHE="+cache)
+	cmd := exec.CommandContext(ctx, "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference='Stop'; $WarningPreference='SilentlyContinue'; $ProgressPreference='SilentlyContinue'; [Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); Import-Module $env:DCR_TEST_MODULE; $probe=Get-FileHash -LiteralPath (Join-Path $env:DCR_TEST_CACHE '_npx/1234abcd/package.json') -Algorithm SHA256 -ErrorAction Stop; if(!$probe.Hash){throw 'hash probe failed'}; ConvertTo-Json -InputObject @(Get-DcrT6Caches $env:DCR_TEST_CACHE | Select-Object id,version,token) -Compress")
+	cmd.Env = append(legacyTestEnv(), "DCR_TEST_MODULE="+module, "DCR_TEST_CACHE="+cache)
 	configure(cmd)
 	out, e := cmd.Output()
 	if e != nil {
+		if exit, ok := e.(*exec.ExitError); ok {
+			t.Fatalf("legacy fixture query failed: %v; fixture-only stderr: %s", e, exit.Stderr)
+		}
 		t.Fatal("legacy fixture query failed", e)
 	}
 	var legacy []app.CacheCandidate
