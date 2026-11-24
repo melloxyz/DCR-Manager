@@ -1,0 +1,3 @@
+﻿# Project skills
+Installed as local, pinned Markdown references under .agents/skills; source.json records upstream commit and path, LICENSE preserves attribution. No skill is a runtime dependency. AGENTS.md routes Codex and other compatible agents; support for automatic discovery depends on the client. Do not copy skills globally or create agent-specific duplicate directories by default.
+Rejected: bubble-tea-expert (v1 patterns/redundant), bubble-tea-scaffolder (v0.25 scaffold), discover-tui (unnecessary gateway), charm-bubbles (upstream 404). golang-tui is useful but its default Bloom/Steep/Reel preferences are not project decisions. No find-skills installation necessary because source review was performed directly.

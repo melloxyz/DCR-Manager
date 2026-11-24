@@ -1,0 +1,247 @@
+# Terminal Standards
+
+## Terminal Integration
+
+Modern terminals expose more than a grid of cells: tab and window titles, a progress
+indicator in the tab or taskbar, program status, focus events, the clipboard, clickable
+links, the working directory, and notifications. A TUI that uses the ones relevant to it
+feels native to the terminal and the desktop around it (a long sync showing progress in the
+tab, a status that says it is waiting on the user, a title that names the open file).
+
+Implement them where they fit the app, following these rules:
+
+- **Use Bubble Tea first.** Prefer `tea.View` fields and built-in commands: they are
+  declarative per frame, diffed by the renderer, and restored when the program exits.
+  Fall back to `x/ansi` sequences through `tea.Raw` only for features Bubble Tea does not
+  cover yet. Do not write escape sequences to stdout directly.
+- **Only where the terminal supports it.** Most of these are ignored by terminals that do
+  not support them, but where Bubble Tea offers a query or reply (program status support,
+  keyboard enhancements, terminal version, capabilities), check before depending on it.
+  Never make one required for the app to work.
+- **Keep it meaningful.** Reflect real state (a long job's progress, waiting on input,
+  the current document). Do not flash, spam notifications, or leave stale state behind:
+  reset progress and report a final status before quitting.
+
+| Feature | Use when | Bubble Tea / Charm |
+| --- | --- | --- |
+| Window / tab title | App has a current context (file, host, page) | `view.WindowTitle` |
+| Terminal progress bar (OSC 9;4) | Long-running work with known or unknown progress | `view.ProgressBar` (`tea.NewProgressBar`) |
+| Program status (OSC 7501) | Long-running or agent-style apps: working, blocked on the user, done, failed | `view.ProgramStatus`, `tea.RequestProgramStatusSupport` |
+| Focus events | Pause animations, notify only when unfocused, refresh on return | `view.ReportFocus`, `tea.FocusMsg` / `tea.BlurMsg` |
+| Clipboard (OSC 52) | Copying values out of the TUI | `tea.SetClipboard`, `tea.ReadClipboard`; see `references/clipboard.md` |
+| Hyperlinks (OSC 8) | URLs, file paths, issue IDs in rendered text | `lipgloss.Style.Hyperlink` |
+| Working directory (OSC 7) | File managers, shells, apps that change directory, so new tabs/splits open there | `tea.Raw(ansi.NotifyWorkingDirectory(...))` |
+| Notifications | Long work finishing or input needed while unfocused | `references/libraries/beeep.md`; OSC 9 / OSC 99 via `x/ansi` |
+| Cursor, colors, keyboard, paste, mouse | Covered below | `view.Cursor`, `view.KeyboardEnhancements`, `view.MouseMode`, ... |
+
+Check the current Bubble Tea docs (`go doc charm.land/bubbletea/v2 View`) for the full set
+of view fields and commands; new terminal features usually land there first.
+
+## Environment Variables
+
+### TERM
+
+Identifies the terminal type. Common values:
+
+- `xterm-256color` -- 256-color capable
+- `xterm-color` -- basic 16-color
+- `screen-256color` -- tmux/screen with 256 colors
+- `dumb` -- no capabilities
+
+### COLORTERM
+
+Indicates extended color support:
+
+- `truecolor` or `24bit` -- TrueColor (16M colors)
+- Not set -- fall back to TERM-based detection
+
+## Color Profiles
+
+`github.com/charmbracelet/colorprofile` detects terminal color capabilities:
+
+```go
+import "github.com/charmbracelet/colorprofile"
+
+profile := colorprofile.Detect(os.Stdout, os.Environ()) // Not needed with bubbletea.
+```
+
+Profile constants (ordered by capability):
+
+- `colorprofile.ASCII` -- no color support
+- `colorprofile.ANSI` -- 16 colors (basic)
+- `colorprofile.ANSI256` -- 256 colors
+- `colorprofile.TrueColor` -- 16 million colors
+
+## Bubble Tea Integration
+
+### tea.ColorProfileMsg
+
+Sent once on startup with the detected terminal color profile:
+
+```go
+case tea.ColorProfileMsg:
+    m.profile = msg.Profile
+    // Recalculate theme based on the new profile if you want custom downsampling logic.
+    cmd := styles.Theme.Update(msg)
+    return m, cmd
+```
+
+### tea.BackgroundColorMsg
+
+Sent in response to `tea.RequestBackgroundColor`. Reports whether the terminal
+background is dark or light:
+
+```go
+func (m model) Init() tea.Cmd {
+    return tea.Batch(
+        tea.RequestBackgroundColor,
+        // ...
+    )
+}
+
+case tea.BackgroundColorMsg:
+    m.hasDarkBg = msg.IsDark()
+    cmd := styles.Theme.Update(msg)
+    return m, cmd
+```
+
+## Automatic Color Downsampling
+
+lipgloss automatically downsample colors to match terminal capabilities:
+
+- In Bubble Tea: the runtime handles downsampling
+- Standalone: use `lipgloss.Println` (not `fmt.Println`) for auto downsampling
+
+TrueColor `#FF5733` automatically becomes the nearest ANSI256 or ANSI 16 color
+when the terminal does not support higher depths.
+
+## Alt Screen
+
+```go
+func (m model) View() tea.View {
+    v := tea.NewView(m.render())
+    v.AltScreen = true
+    return v
+}
+```
+
+The alt screen provides a clean, full-screen scrollback-free canvas. Toggle
+dynamically by changing the `AltScreen` field based on application state.
+
+## OSC Sequences
+
+Operating System Command sequences communicate with the terminal emulator. Some examples:
+
+- **OSC 52** -- Set clipboard content. Used by `tea.SetClipboard(s)`.
+- **OSC 10/11** -- Query foreground/background colors. Used by `tea.RequestBackgroundColor`.
+- **OSC 2** -- Set window title. Used by `tea.View.WindowTitle`.
+
+These are handled by Bubble Tea's built-in commands. Do not send raw OSC sequences
+unless you need terminal-specific features not covered by the API.
+
+## Bracketed Paste
+
+Bracketed paste lets the terminal wrap pasted text so applications can treat it as
+one unit instead of many keypresses. The terminal enables mode `2004` (CSI
+`?2004h`), wraps pasted bytes between `ESC[200~` and `ESC[201~`, then disables the
+mode when appropriate.
+
+**Bubble Tea:** The runtime enables bracketed paste by default. Handle `tea.PasteMsg`
+(`.Content` holds the pasted text). Optional `tea.PasteStartMsg` and `tea.PasteEndMsg`
+bracket the paste if you need boundary hooks. Set `v.DisableBracketedPasteMode = true`
+on the View to turn the feature off for that frame.
+
+**Low-level sequences:** `github.com/charmbracelet/x/ansi` defines `SetModeBracketedPaste`,
+`ResetModeBracketedPaste`, and the paste delimiter constants `BracketedPasteStart` /
+`BracketedPasteEnd` (the `200~` / `201~` wrappers). Prefer Bubble Tea messages over
+parsing delimiters yourself.
+
+## Keyboard Enhancements
+
+**Kitty keyboard protocol:** Terminals that implement it can report richer key events
+(disambiguation, release events, repeat). `github.com/charmbracelet/x/ansi` exposes
+helpers such as `RequestKittyKeyboard`, `KittyKeyboard(flags, mode)`, `PushKittyKeyboard`,
+`PopKittyKeyboard`, and `DisableKittyKeyboard`. See the upstream spec linked from
+`kitty.go` in that module.
+
+**Bubble Tea:** Request enhanced behavior on the View:
+
+```go
+v.KeyboardEnhancements.ReportEventTypes = true
+```
+
+When supported, you get `tea.KeyboardEnhancementsMsg` (check `SupportsEventTypes()` and
+related helpers), `tea.KeyReleaseMsg`, and `tea.KeyPressMsg` with `Key.IsRepeat` for
+auto-repeat. Not every terminal implements the full set; always handle the baseline
+`tea.KeyPressMsg` paths.
+
+## Progress Indicators
+
+### OSC 9 taskbar / shell progress (Windows Terminal and similar)
+
+Some terminals show progress in the window or tab using OSC `9;4` sequences. In Bubble
+Tea, set `view.ProgressBar` (from `tea.NewProgressBar(state, value)`) and set it back to
+nil when the work ends; this is the terminal's indicator, not a bar drawn in the TUI.
+`github.com/charmbracelet/x/ansi` has the raw `SetProgressBar` / `ResetProgressBar`
+family for non-Bubble Tea output.
+
+### OSC 7501 program status (Bubble Tea v2.1+)
+
+The Program Status Protocol lets a TUI tell the terminal whether it is idle, working, blocked
+on the user, done, or failed (e.g. a tab indicator for long-running or agent-style apps).
+Set `view.ProgramStatus = &tea.ProgramStatus{...}` using `tea.ProgramState*` (`Idle`, `Working`,
+`Done`, `Blocked`, `Error`, `Clear`) and, for `Blocked`, a `tea.ProgramStatusKind*`
+(`Permission`, `Question`, `Auth`). Unsupported terminals ignore it, so detection is optional:
+`tea.RequestProgramStatusSupport` replies with `tea.ProgramStatusSupportMsg` only on supporting
+terminals (needs input enabled; pick your own timeout). Example: `examples/program-status` in bubbletea.
+
+### In-app progress bar (Bubbles)
+
+For a bar drawn inside your Bubble Tea layout, use `charm.land/bubbles/v2/progress`
+(animated or static `ViewAs`). See `references/libraries/bubbles-v2.md`.
+
+## Images and Raster Output
+
+Sixel, Kitty graphics, iTerm2 inline images, and unicode mosaic rendering are covered
+in `references/images.md` (package map, Bubble Tea embedding, and code examples).
+
+## Testing with Reduced Color Depth
+
+Add Taskfile/Makefile tasks that force reduced color to verify fallbacks work.
+Taskfile example:
+
+```yaml
+debug:basic:
+  desc: run with reduced color depth
+  interactive: true
+  cmds:
+    - TERM="xterm-color" COLORTERM="xterm-color" go run
+```
+
+This causes `colorprofile.Detect` to report `ANSI` instead of TrueColor, exercising
+your fallback color paths.
+
+### What to Test
+
+- All colors render as readable ANSI basic colors
+- Layout is unaffected by color depth changes
+- No TrueColor escape sequences leak into ANSI-only output (can occur with pre-computed state/styles)
+
+## Summary
+
+| Feature | Controlled By | Bubble Tea / Charm notes |
+| --- | --- | --- |
+| Color depth | TERM, COLORTERM | `tea.ColorProfileMsg` |
+| Dark/light | Background query | `tea.BackgroundColorMsg` |
+| Alt screen | View property | `view.AltScreen = true` |
+| Window title | View property | `view.WindowTitle = "..."` |
+| Clipboard | OSC 52 | `tea.SetClipboard(s)` |
+| Mouse | View property | `view.MouseMode = ...` |
+| Focus events | View property | `view.ReportFocus = true` |
+| Bracketed paste | Terminal mode 2004 | `tea.PasteMsg`, optional `DisableBracketedPasteMode`; `ansi.SetModeBracketedPaste` |
+| Keyboard enhancements | Kitty protocol, terminal | `view.KeyboardEnhancements`, `tea.KeyboardEnhancementsMsg`, `KeyReleaseMsg`; `ansi.KittyKeyboard` |
+| OSC progress | Terminal (OSC 9;4) | `view.ProgressBar`; `ansi.SetProgressBar` outside Bubble Tea |
+| Hyperlinks | Terminal (OSC 8) | `lipgloss.Style.Hyperlink` |
+| Working directory | Terminal (OSC 7) | `tea.Raw(ansi.NotifyWorkingDirectory(...))` |
+| Program status | Terminal (OSC 7501) | `view.ProgramStatus`, `tea.RequestProgramStatusSupport` |
+| Images, sixel, Kitty, iTerm2, mosaic | Terminal protocol | `references/images.md` |
