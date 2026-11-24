@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased (1.4.0-dev)
+- Add isolated native cache quarantine with exact token checks, no-overwrite directory moves, durable compatible restore sidecars and native/legacy recovery parity; live maintenance remains on PowerShell.
 - Add isolated native package switching with allowlisted no-overwrite moves, compatible durable journals, backups and verified rollback; preserve credentials and retain PowerShell maintenance in production.
 - Add switch fault-injection, locked-file and native/legacy recovery parity regressions; classify partial backups without ownership manifests as unsafe.
 - Migrate bounded npm log scanning and known JSON MCP configuration audit to native Go.
