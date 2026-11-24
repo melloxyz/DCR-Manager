@@ -6,7 +6,7 @@ jobs:
   tests:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Windows PowerShell 5.1
         shell: powershell
         run: ./tests/All.Tests.ps1
