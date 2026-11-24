@@ -11,6 +11,7 @@
 - Improve diagnostics of hosted cache-token parity failures without weakening the comparison.
 - Add native process inventory and parent health, full-set legacy reconciliation and independent native maintenance preflight.
 - Normalize Windows short-path aliases in legacy-compatible cache and recovery tokens; isolate legacy Windows PowerShell child module discovery.
+- Add internal native package staging, exact version and lockfile validation, and opt-in real npm artifact acceptance; live maintenance remains on the legacy engine.
 
 ## 1.3.1
 - Update checkout and setup-go to v7 (#1, #2).

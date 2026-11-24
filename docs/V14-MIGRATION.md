@@ -6,8 +6,8 @@ Goal: remove PowerShell/Python from the Go application's runtime path without we
 | --- | --- | --- |
 | V14-01A | Native bounded npm history and six JSON MCP locations | Implemented; local parity and regression |
 | V14-01B | Native TOML parsing, runtime/version and npm command discovery | Implemented; local parity and regression |
-| V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | Implemented locally; hosted token parity pending |
-| V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | Pending |
+| V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | Implemented; hosted parity passed |
+| V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | In progress (D.1 staging implemented) |
 | V14-01E | Cross-backend parity, fault injection, legacy interoperability, clean-profile acceptance | Pending |
 
 Do not remove a bridge capability before its replacement has fixture coverage, comparison against the existing backend and fail-closed behavior. Preserve package ownership checks, path/reparse restrictions, PID and creation identities, stale-token guards, credentials and rollback journals. Native transaction tests must use isolated directories and must not stop the live Remote. Treat supported engine ranges and npm command discovery as explicit contracts. Evaluate a maintained TOML parser separately, including license and dependency review; no new dependency added in 01A.
@@ -40,7 +40,7 @@ Local read-only parity: Node v24.15.0, npm 11.12.1, declared >=22.12.0 and meets
 | Substage | Scope | State |
 | --- | --- | --- |
 | V14-01C.1 | Native npm directory discovery, installation and cache inventory | Implemented; local parity and regression |
-| V14-01C.2 | Native recovery inventory, transaction journals and restore-token parity | Implemented; local parity and regression; hosted parity pending |
+| V14-01C.2 | Native recovery inventory, transaction journals and restore-token parity | Implemented; local and hosted parity passed |
 | V14-01C.3 | Native process health and independent mutation-guard parity | Implemented; local parity and regression |
 
 C.1 obtains npm cache and global node_modules paths through fixed read-only npm commands. The command runner retains the caller working directory to match existing maintenance behavior, uses the system cmd.exe and fixed arguments, bounded output and deadlines. Discovery requires absolute valid paths. Go inspects dedicated/global installations and exclusive npx cache directories using bounded manifest reads, path/identity checks and fixed output classifications. The inventory is not an exhaustive scan of all possible Node/npm installations. The cache scan has a cooperative five-second deadline and a 10,000-directory-entry cap. Extra dependency/workspace declarations are conservatively rejected. Unknown/unsupported layouts may differ from the permissive historical inventory. A dedicated status mismatch rejects the snapshot rather than displaying unsafe confirmation data.
@@ -74,3 +74,27 @@ Local validation: all three active Remote rows and their parent assessments matc
 The first hosted failures were not token mismatches: the legacy cache scan yielded no rows and recovery validation returned unsafe. Removing the inherited PowerShell 7 PSModulePath from Windows PowerShell child processes allowed both fixture types to be read in the runner. This isolation now applies only to the legacy child environment in the application as well as tests; it does not modify the user's shell or global configuration.
 
 The next hosted run proved that the cache fixture path differed (short 8.3 alias versus expanded Windows path), while creation ticks and the raw manifest hash agreed. Native cache/recovery tokens now use GetLongPathName and verify the resolved path still identifies the same non-reparse filesystem object. Failure to resolve is fail-closed. The existing tests still compare complete legacy tokens; a short-alias regression fixture is added when the volume supports it. Local parity passes; hosted confirmation of the fix is required before closing the C acceptance gate.
+
+
+## Hosted inventory acceptance
+
+Commit ee7567a passed both Go TUI (run 45432895358) and Windows tests (run 45432895376). The C.1/C.2 token parity failures are resolved in the hosted runner; C.3 is implemented and the same commit includes the process inventory. Clean-machine and independent real-world acceptance remain V14-05 gates. The production bridge continues to provide independent parity checks until native mutation integration.
+
+## V14-01D: Native maintenance
+
+| Substage | Scope | State |
+| --- | --- | --- |
+| D.1a | Package preparation, pinned/latest selection and isolated artifact runner | Implemented; fixture and real pinned artifact validation |
+| D.1b | Native package switch and guarded activation with recoverable journal | Pending |
+| D.2 | Cache quarantine with same-volume move and compatible sidecar | Pending |
+| D.3 | Package/cache backup restore | Pending |
+| D.4 | Shared mutex, fault injection, rollback/recovery hardening | Pending |
+| D.5 | Integration and replacement of PowerShell maintenance path | Pending |
+
+D.1a adds an internal preparation primitive, deliberately not connected to Maintain or TUI. Repair uses the existing exact version; initial install and explicit update select latest. It checks exclusive ownership, expected version, disjoint canonical roots on the same volume, existing safe parents and injected process guards before and after staging. It creates a random stage directory only under the provided state root, preserves failed stages, validates its identity, regular entry point, exact top-level dependency and npm v2+ lockfile root/package version. The original installation is never switched or edited by this primitive. This validates structure and version consistency, not cryptographic authenticity or all transitive dependencies. Full tree safety, race checks, durable transaction journaling, rollback and shared-mutex enforcement belong to later substages; do not expose it as a live maintenance action before those gates.
+
+The artifact-only npm runner resolves a standard adjacent node.exe/npm.cmd/npm-cli.js installation and invokes Node with a fixed argument vector, without constructing shell strings. It uses isolated temporary npm cache and user/global configuration paths, strips inherited npm config and NODE_OPTIONS/NODE_PATH for the child, ignores lifecycle scripts, uses save-exact, bounded fetch retries/timeouts and an overall three-minute deadline. Raw command output is not surfaced. It is not a production installer, process-tree sandbox or validation of upstream authentication; alternate launcher layouts and lifecycle execution remain pending. No automatic download runs in the normal tests.
+
+Fixture tests cover exact repair, fresh install/latest and explicit update selection, ownership, path overlap, cancellation, invalid/mismatched lockfile, version mismatch, guard refusal, stage failure and stale current version. Explicit local network acceptance ran against the actual npm package @wonderwhy-er/desktop-commander@0.3.4 and passed in 35.48 seconds; the fake installed entry remained unchanged. Run from the repository with the environment DCR_NATIVE_ARTIFACT_TEST=1 and go test ./internal/backend -run '^TestNativeArtifactAcceptance$' -count=1 -v. The fixture downloads only to a temporary tree and suppresses lifecycle scripts. The real Remote, credentials, production cache and actual installation were not modified.
+
+The native maintenance engine remains disabled for users; existing PowerShell transactions are unchanged. Next implement journaled no-overwrite package switching and fault-injected rollback in isolated fixtures.

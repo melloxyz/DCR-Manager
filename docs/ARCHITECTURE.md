@@ -30,3 +30,5 @@ Bridge schema 3 delegates npm directory discovery and installation/cache invento
 Go now provides the recovery inventory and stage classification. Ready backup tokens must agree with independent legacy validation; cache destinations also depend on npm root agreement. The legacy bridge still performs recovery and cache cross-checks, process inventory and process health. No mutation is migrated in C.2.
 
 Native process inventory now reconciles the entire DCR set against legacy rows and counts; parent health is obtained through Windows handles. A separate native Node preflight precedes maintenance, but the legacy transaction retains its original in-lock guards. The PowerShell bridge remains an independent parity source for cache, recovery and processes until native maintenance/acceptance are complete.
+
+V14-01D.1a introduces an internal package preparation primitive and a test-only native npm artifact runner. It validates ownership, stale version, stage identity and pinned manifest/lockfile consistency without replacing the installation. Maintain still uses the legacy transaction until native switching, rollback and mutation guards are accepted.
