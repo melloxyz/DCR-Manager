@@ -1,6 +1,6 @@
 # Development handoff
 
-Last reviewed: 2026-11-24. This is the continuation entry point for the v1.4.0 development branch. Read actual source and Git status before making changes; historical observations here are not live machine state.
+Last reviewed: 2026-11-25. This is the continuation entry point for the v1.4.0 development branch. Read actual source and Git status before making changes; historical observations here are not live machine state.
 
 ## Repository and version policy
 
@@ -59,6 +59,8 @@ V14-02 portable executable/bundle; V14-03 release engineering and notices; V14-0
 - Keep paths absolute, reject reparse points/unsupported layouts, use same-volume no-overwrite moves, preserve backup and journal evidence; do not claim race-free or cryptographic full-tree authenticity.
 
 ## Next work: D.3
+
+2026-11-25 review: current Git/CI and version metadata were checked before resuming development. The maintainer requested a project-status review before continuing implementation. V14-02 now explicitly includes an approved multi-resolution application icon embedded in the Windows executable, reproducible build inclusion and Explorer/shortcut verification. Icon artwork and executable resource embedding are planned, not implemented. D.3 remains the next functional stage; this review changes documentation only.
 
 D.1b is implemented internally using TDD and temporary fixtures. Tests cover fresh install and repair/update, credential/unrelated-file preservation, all six forward and all six reverse move failure boundaries, real locked files, occupied/replaced targets, stale inputs, reparse paths, journal failures and cancellation. Native/legacy inventory and restore-token parity pass for completed, failed and incomplete rollback transactions. No active installation was switched.
 
