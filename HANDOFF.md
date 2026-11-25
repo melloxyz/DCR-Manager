@@ -6,7 +6,7 @@ Last reviewed: 2026-11-25. This is the continuation entry point for the v1.4.0 d
 
 - Official repository: https://github.com/melloxyz/DCR-Manager
 - Stable source: main and annotated tag v1.3.1, commit 4ab08254ee7f0bce9eb881f6f2208685ffff8478.
-- Active development: feat/v1.4-native-backend; functional D.2 baseline 94b3f99a353470f6b23d25da843e559c89a635a3. Later documentation commits may advance HEAD.
+- Active development: feat/v1.4-native-backend; functional D.3 baseline b17c62a45495001639775427aa3b2afc39f4d612. Later documentation commits may advance HEAD.
 - Go app version: 1.4.0-dev. VERSION remains 1.3.1 until promotion. Legacy PowerShell manager remains v1.2.1. MIT license; English-only UI; Graphite Dark.
 - The original published history is authoritative. The separate sanitized RC2 publication clone was not used for publication; its history is not a development branch and must not be pushed over main. Preserve public tags and do not force-push.
 - Work in the single canonical checkout; keep the stable executable and dev executable separate. No public binary release has been made.
@@ -75,7 +75,12 @@ Keep Maintain wired to PowerShell until D.4/D.5 shared mutex, all-process guards
 
 ## Verified baseline and commands
 
-D.3 local acceptance (2026-11-25): `go test ./... -json -count=1` passed 272 test/subtest events (121 top-level tests), with two top-level skips: 8.3 fixture alias unavailable and real npm artifact network opt-in absent. Windows PowerShell and PowerShell 7 each passed all 57 fixture tests. Vet, module verification, govulncheck v1.10.0, diff checks and the separate dev build passed; executable reports `1.4.0-dev`. All restore mutations targeted temporary fixtures. Prepared-stage regression tests still enforce the stricter lockfile contract. Hosted D.3 results must be recorded after pushing the implementation commit.
+D.3 local acceptance (2026-11-25): `go test ./... -json -count=1` passed 272 test/subtest events (121 top-level tests), with two top-level skips: 8.3 fixture alias unavailable and real npm artifact network opt-in absent. Windows PowerShell and PowerShell 7 each passed all 57 fixture tests. Vet, module verification, govulncheck v1.10.0, diff checks and the separate dev build passed; executable reports `1.4.0-dev`. All restore mutations targeted temporary fixtures. Prepared-stage regression tests still enforce the stricter lockfile contract.
+
+Hosted D.3 acceptance at b17c62a:
+- Go TUI passed: https://github.com/melloxyz/DCR-Manager/actions/runs/45650012098 (module verification, tests, vet, govulncheck and build).
+- Windows tests passed: https://github.com/melloxyz/DCR-Manager/actions/runs/45650012053 (Windows PowerShell 5.1 and PowerShell 7).
+- The implementation was committed conventionally and pushed normally to the feature branch. main, origin/main and peeled v1.3.1 remained at 4ab08254ee7f0bce9eb881f6f2208685ffff8478. No production maintenance route, stable tag, real credentials/preferences or active Remote was changed.
 
 D.2 local acceptance (2026-11-24): `go test ./... -json -count=1` passed 192 test/subtest events (108 top-level tests), with two top-level skips: 8.3 fixture alias unavailable and real npm artifact network opt-in absent. Windows PowerShell and PowerShell 7 each passed all 57 fixture tests. Vet, module verification, govulncheck v1.10.0, diff checks and the separate dev build passed; executable reports `1.4.0-dev`. The active Remote, actual caches, credentials, client preferences, startup and UI were not modified. Shared mutex, power-loss/race testing, full-tree cryptographic integrity and production acceptance remain unverified.
 
