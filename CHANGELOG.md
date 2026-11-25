@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased (1.4.0-dev)
+- Add isolated native package/cache backup restore with exact recovery-token checks, verified package copies, legacy lockfile compatibility, no-overwrite activation and preserved source/rollback evidence; production maintenance remains on PowerShell.
 - Add isolated native cache quarantine with exact token checks, no-overwrite directory moves, durable compatible restore sidecars and native/legacy recovery parity; live maintenance remains on PowerShell.
 - Add isolated native package switching with allowlisted no-overwrite moves, compatible durable journals, backups and verified rollback; preserve credentials and retain PowerShell maintenance in production.
 - Add switch fault-injection, locked-file and native/legacy recovery parity regressions; classify partial backups without ownership manifests as unsafe.

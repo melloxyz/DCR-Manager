@@ -156,7 +156,8 @@ func switchNativePackage(ctx context.Context, root, state string, p packageStage
 		if e := stageRoots(root, state); e != nil {
 			return e
 		}
-		if filepath.Dir(p.Stage) != state || !strings.HasPrefix(filepath.Base(p.Stage), "stage-") || !recoveryName.MatchString(filepath.Base(p.Stage)) {
+		restore := strings.HasPrefix(filepath.Base(p.Stage), "restore-stage-")
+		if filepath.Dir(p.Stage) != state || (!restore && !strings.HasPrefix(filepath.Base(p.Stage), "stage-")) || !recoveryName.MatchString(filepath.Base(p.Stage)) {
 			return maintenanceError("UNSAFE")
 		}
 		i, e := plainInfo(p.Stage)
@@ -169,7 +170,11 @@ func switchNativePackage(ctx context.Context, root, state string, p packageStage
 		if stageVersion(root) != expected {
 			return maintenanceError("STALE")
 		}
-		v, e := validatePreparedPackage(p.Stage)
+		validate := validatePreparedPackage
+		if restore {
+			validate = validatePackageFiles
+		}
+		v, e := validate(p.Stage)
 		if e != nil {
 			return e
 		}

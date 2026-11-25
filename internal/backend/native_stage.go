@@ -49,7 +49,9 @@ func stageVersion(root string) string {
 	_, v, _ := inspectInstallation("dedicated", filepath.Join(root, "node_modules"))
 	return v
 }
-func validatePreparedPackage(stage string) (string, error) {
+
+// Legacy backups require a regular lockfile, but not the newer npm v2+ structure.
+func validatePackageFiles(stage string) (string, error) {
 	if e := stageOwnership(stage); e != nil {
 		return "", e
 	}
@@ -62,8 +64,19 @@ func validatePreparedPackage(stage string) (string, error) {
 	if e != nil || json.Unmarshal([]byte(strings.TrimPrefix(string(raw), "\uFEFF")), &top) != nil || top.Dependencies[dcrPackage] != v {
 		return "", maintenanceError("NPM")
 	}
+	if i, e := plainInfo(filepath.Join(stage, "package-lock.json")); e != nil || !i.Mode().IsRegular() {
+		return "", maintenanceError("NPM")
+	}
+	return v, nil
+}
+
+func validatePreparedPackage(stage string) (string, error) {
+	v, e := validatePackageFiles(stage)
+	if e != nil {
+		return "", e
+	}
 	// npm v7+ lockfile structure; require pinned root and installed package version.
-	raw, e = readPlainFile(filepath.Join(stage, "package-lock.json"), 16*1024*1024)
+	raw, e := readPlainFile(filepath.Join(stage, "package-lock.json"), 16*1024*1024)
 	var lock struct {
 		LockfileVersion int
 		Packages        map[string]struct {

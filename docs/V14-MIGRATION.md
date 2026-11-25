@@ -7,7 +7,7 @@ Goal: remove PowerShell/Python from the Go application's runtime path without we
 | V14-01A | Native bounded npm history and six JSON MCP locations | Implemented; local parity and regression |
 | V14-01B | Native TOML parsing, runtime/version and npm command discovery | Implemented; local parity and regression |
 | V14-01C | Native installation/cache/process health/recovery inventory with independent process guard parity | Implemented; hosted parity passed |
-| V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | In progress (D.1 staging/switching and D.2 quarantine implemented internally) |
+| V14-01D | Staged package maintenance, cache quarantine, recovery and shared Windows mutex in Go | In progress (D.1 staging/switching, D.2 quarantine and D.3 restore implemented internally) |
 | V14-01E | Cross-backend parity, fault injection, legacy interoperability, clean-profile acceptance | Pending |
 
 Do not remove a bridge capability before its replacement has fixture coverage, comparison against the existing backend and fail-closed behavior. Preserve package ownership checks, path/reparse restrictions, PID and creation identities, stale-token guards, credentials and rollback journals. Native transaction tests must use isolated directories and must not stop the live Remote. Treat supported engine ranges and npm command discovery as explicit contracts. Evaluate a maintained TOML parser separately, including license and dependency review; no new dependency added in 01A.
@@ -87,7 +87,7 @@ Commit ee7567a passed both Go TUI (run 45432895358) and Windows tests (run 45432
 | D.1a | Package preparation, pinned/latest selection and isolated artifact runner | Implemented; fixture and real pinned artifact validation |
 | D.1b | Native package switch and guarded activation with recoverable journal | Implemented as an isolated primitive; production activation remains disabled |
 | D.2 | Cache quarantine with same-volume move and compatible sidecar | Implemented as an isolated primitive; production activation remains disabled |
-| D.3 | Package/cache backup restore | Pending |
+| D.3 | Package/cache backup restore | Implemented as isolated primitives; production activation remains disabled |
 | D.4 | Shared mutex, fault injection, rollback/recovery hardening | Pending |
 | D.5 | Integration and replacement of PowerShell maintenance path | Pending |
 
@@ -97,7 +97,7 @@ The artifact-only npm runner resolves a standard adjacent node.exe/npm.cmd/npm-c
 
 Fixture tests cover exact repair, fresh install/latest and explicit update selection, ownership, path overlap, cancellation, invalid/mismatched lockfile, version mismatch, guard refusal, stage failure and stale current version. Explicit local network acceptance ran against the actual npm package @wonderwhy-er/desktop-commander@0.3.4 and passed in 35.48 seconds; the fake installed entry remained unchanged. Run from the repository with the environment DCR_NATIVE_ARTIFACT_TEST=1 and go test ./internal/backend -run '^TestNativeArtifactAcceptance$' -count=1 -v. The fixture downloads only to a temporary tree and suppresses lifecycle scripts. The real Remote, credentials, production cache and actual installation were not modified.
 
-The native maintenance engine remains disabled for users; existing PowerShell transactions are unchanged. D.1b implements journaled no-overwrite package switching and fault-injected rollback in isolated fixtures. D.2 adds isolated cache quarantine. Next is D.3 backup restore; shared mutex and production integration remain D.4/D.5 gates.
+The native maintenance engine remains disabled for users; existing PowerShell transactions are unchanged. D.1b implements journaled no-overwrite package switching and fault-injected rollback in isolated fixtures. D.2 adds isolated cache quarantine and D.3 adds isolated backup restore. Next is D.4 shared mutex and recovery hardening; production integration remains a D.5 gate.
 
 Hosted D.1a acceptance: ec72ee9 passed Go TUI (45434038675) and Windows tests (45434038446). See ../HANDOFF.md for the continuation plan and D.1b constraints.
 
@@ -130,3 +130,19 @@ TDD regressions cover selected-cache identity preservation, unchanged unselected
 Local D.2 acceptance: 192 Go test/subtest passes (108 top-level tests), two explicit skips (8.3 fixture alias and opt-in npm artifact download); 57 fixture tests passed in each PowerShell version. Vet, module verification, govulncheck and the separate `1.4.0-dev` build passed. Hosted acceptance at `94b3f99`: [Go TUI 45462972640](https://github.com/melloxyz/DCR-Manager/actions/runs/45462972640) and [Windows tests 45462972460](https://github.com/melloxyz/DCR-Manager/actions/runs/45462972460) both passed. See HANDOFF.md for implementation and test-fix commits.
 
 The restore-target parity test compares validated canonical paths, including an uppercase spelling regression, because hosted Windows can use different case or 8.3 aliases for the same parent directory. It still compares complete restore tokens exactly; normalization does not permit a different target parent or cache ID.
+
+### D.3: isolated native backup restore
+
+`restoreNativeBackup` validates the typed restore request, absolute disjoint destination/state roots on the same volume, ready recovery status, exact complete restore token and the backup directory identity. It repeats token/identity/path validation after the source process guard and before activation. Only package/cache backup names are accepted; transaction stages are never restore targets. No production maintenance path calls this primitive.
+
+Package restore copies only `node_modules`, `package.json` and `package-lock.json` into a fresh random `restore-stage-<32 hex>` directory. The original backup and its unrelated files remain untouched. Copying uses exclusively created destination files, plain-path and opened-file identity checks, exact-size reads in cancellation-aware chunks, file sync and source-tree revalidation. The staged and source package trees must have the same structure and SHA-256 file contents before activation. Failed/partial stages remain evidence. The expected current installed version, including `absent` and `unknown`, is checked before copying and by the reused package switch.
+
+Prepared npm stages still require the existing v2+ lockfile structural checks. Restored stages use the legacy backup contract: an exclusive pinned manifest, matching installed package/version, regular entry and regular lockfile. Legacy lockfiles such as `{}` remain restorable; restore never rewrites or regenerates them. `switchNativePackage` recognizes owned `restore-stage-*` directories and reuses the no-overwrite moves, unique previous-package backup, schema-1 journal and independent reverse rollback. The original source token must still match after copying and after the destination guard. Credentials and unrelated installation files stay outside activation.
+
+Cache restore validates the sidecar's original `_npx` target and guards both source and destination. It rechecks the full recovery token and source identity, refuses occupied/linked targets and renames the backup using the same-volume native no-replace move. The sidecar remains in state as audit evidence. Post-verification runs independently of caller cancellation after the move and checks directory identity, tracked-tree identities/metadata, full-tree count/size, version, source vacancy and exact retained sidecar bytes. A failed/uncertain move or verification preserves all remaining evidence; no automatic reverse cache move or deletion runs.
+
+Fixture regressions cover legacy lockfiles, current/absent/unknown installations, exact source-token preservation, unrelated source-file exclusion, credentials, corrupt/partial/failed copies, replaced stage/backup identities, stale versions/tokens, invalid names/actions, overlapping/relative/linked paths, early/late guards and cancellation, occupied/changed cache targets and sidecars, all six forward and six reverse package move failure boundaries, journal failures, post-move cache failures and real Windows file/directory sharing violations. Native/legacy recovery inventories, completed restore journals and restored cache tokens match exactly in isolated fixtures.
+
+Local D.3 acceptance: 272 Go test/subtest passes (121 top-level tests), two explicit skips (8.3 fixture alias and opt-in npm artifact download); 57 fixture tests passed in each PowerShell version. Vet, module verification, govulncheck and the separate `1.4.0-dev` build passed. Hosted evidence will be recorded after the feature branch is pushed.
+
+Limits: content comparisons verify the copied artifact at the checks performed; they do not authenticate the backup or prevent hostile filesystem races. Shared mutex/in-mutex all-process checks, handle-relative race hardening, power-loss/crash replay, real upstream lifecycle and clean-machine acceptance remain pending. Sync and write-through operations do not prove power-loss durability. No real installation, npm cache, credentials, agent configuration or active Remote was used as a mutation target.
